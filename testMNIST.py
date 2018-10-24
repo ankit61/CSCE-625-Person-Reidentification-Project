@@ -71,7 +71,7 @@ def train(model, device, train_loader, optimizer, epoch):
 
 def main():
     BATCH_SIZE = 128
-    EPOCHS = 10
+    EPOCHS = 50
     LEARNING_RATE = .001
 
     MOMENTUM = .02
