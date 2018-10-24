@@ -5,6 +5,9 @@ class RealConv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True):
         super(RealConv2d, self).__init__()
         self.conv = torch.nn.Conv2d(1, out_channels, kernel_size, stride, padding, dilation, groups, bias)
+        torch.nn.init.kaiming_normal_(self.conv.weight, mode='fan_out', nonlinearity='relu')
+        if self.conv.bias is not None:
+            torch.nn.init.constant_(self.conv.bias, 0)
         
         self.kernelSize = kernel_size
         if type(kernel_size) is not tuple:
