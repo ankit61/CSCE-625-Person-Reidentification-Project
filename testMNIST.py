@@ -11,6 +11,11 @@ import torchvision
 import torchvision.transforms as transforms
 from torchvision import datasets, transforms
 
+from tensorboardX import SummaryWriter
+
+writer = SummaryWriter()
+
+
 torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 class Net(nn.Module):
@@ -68,6 +73,8 @@ def train(model, device, train_loader, optimizer, epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
+            writer.add_text('Text', 'text logged at step:' + str(batch_idx), batch_idx)
+            writer.add_scalar('data/scalar1', loss.item(), batch_idx)
 
 def main():
     BATCH_SIZE = 128
@@ -78,7 +85,7 @@ def main():
 
     device = torch.device("cuda")
     train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, download=True,
+        datasets.MNIST('/datasets', train=True, download=True,
                        transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
@@ -86,7 +93,7 @@ def main():
         batch_size=64, shuffle=True)
 
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=False, transform=transforms.Compose([
+        datasets.MNIST('/datasets', train=False, transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
