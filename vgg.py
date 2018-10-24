@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import math
+from RealConv import RealConv2d
 
 
 __all__ = [
@@ -46,17 +47,16 @@ class VGG(nn.Module):
 
     def _initialize_weights(self):
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
+#            if isinstance(m, nn.Conv2d):
+#                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+#                if m.bias is not None:
+#                    nn.init.constant_(m.bias, 0)
+            if isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
-
 
 def make_layers(cfg, batch_norm=False):
     layers = []
@@ -183,4 +183,4 @@ def vgg19_bn(pretrained=False, **kwargs):
     model = VGG(make_layers(cfg['E'], batch_norm=True), **kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['vgg19_bn']))
-return model
+    return model
