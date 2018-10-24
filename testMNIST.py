@@ -5,27 +5,28 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from RealConv import RealConv2d
 
 import torchvision
 import torchvision.transforms as transforms
 from torchvision import datasets, transforms
 
+torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
 class Net(nn.Module):
 
-    def __init__(self):
+    def __init__(self, device):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
+        self.conv1 = RealConv2d(1, 10, kernel_size=5).to(device)
+        self.conv2 = RealConv2d(10, 20, kernel_size=5).to(device)
         self.fc1 = nn.Linear(320, 50)
         self.fc2 = nn.Linear(50, 10)
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
+        x = F.max_pool2d(self.conv1(x), 2)
+        x = F.max_pool2d(self.conv2(x), 2)
         x = x.view(-1, 320)
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
 
@@ -75,7 +76,7 @@ def main():
 
     MOMENTUM = .02
 
-    device = torch.device("cpu")
+    device = torch.device("cuda")
     train_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../data', train=True, download=True,
                        transform=transforms.Compose([
@@ -92,19 +93,13 @@ def main():
         batch_size=BATCH_SIZE, shuffle=True)
 
     print('Conv Net Architecture: ')
-    net = Net()
+    net = Net(device)
     print(net)
     model = net.to(device)
     optimizer = optim.SGD(model.parameters(), LEARNING_RATE)
     for epoch in range(1, EPOCHS + 1):
         train(model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
-
-
-
-
-
-
 
 
 
