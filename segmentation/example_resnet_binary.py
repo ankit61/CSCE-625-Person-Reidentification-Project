@@ -42,7 +42,7 @@ from sklearn.metrics import confusion_matrix
 # Tensorboard 
 from tensorboardX import SummaryWriter
 
-writer = SummaryWriter('/runs/')
+writer = SummaryWriter('/runs/images')
 
 def flatten_logits(logits, number_of_classes):
     """Flattens the logits batch except for the logits dimension"""
@@ -368,7 +368,7 @@ with open("logfile10.txt", "a+") as file:
         # Save the model if it has a better MIoU score.
         if current_validation_score > best_validation_score:
 
-            torch.save(fcn.state_dict(), f'resnet_18_8s_best_hsv{epoch}.pth')
+            torch.save(fcn.state_dict(), f'resnet_18_8s_best_hsv_IMAGES{epoch}.pth')
             best_validation_score = current_validation_score
                 
 
