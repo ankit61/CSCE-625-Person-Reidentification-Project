@@ -3,4 +3,4 @@ resnet*
 ./__pycache__
 *.png
 *.jpg
-
+venv/
