@@ -39,6 +39,13 @@ from PIL import Image
 
 from sklearn.metrics import confusion_matrix
 
+# Tensorboard 
+from tensorboardX import SummaryWriter
+
+writer = SummaryWriter('/runs/')
+
+
+
 torch.device = 'cpu'
 
 def flatten_logits(logits, number_of_classes):
@@ -336,7 +343,12 @@ for epoch in range(30):  # loop over the dataset multiple times
         if i % 2 == 1:
             
             print(f" Running loss for batchnum = {i} {running_loss}")
-            loss_history.append(running_loss / 2)
+            
+            # loss looks to be averaged across 2 batches
+            avg_loss = running_loss / 2
+
+            loss_history.append(avg_loss)
+            writer.add_scalar('segmentation/total_loss' + str(epoch), avg_loss, i)
             loss_iteration_number_history.append(loss_current_iteration)
             
             loss_current_iteration += 1
