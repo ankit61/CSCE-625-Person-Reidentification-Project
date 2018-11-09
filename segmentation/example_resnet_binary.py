@@ -94,18 +94,52 @@ class LIPDataset(torch.utils.data.Dataset):
         #print(f"filenames called {_img.size()}:{_target.size()}")
         return _img, _target
 
+class ScaleDownOrPad(object):
+    
+    
+    def __init__(self, output_size, interpolation=Image.BILINEAR, fill=0):
+        self.interpolation = interpolation
+        self.fill = fill
+        self.output_size = output_size
+        if output_size[0] > output_size[1]:
+            self.greater_side_size = output_size[0]
+        else:
+            self.greater_side_size = output_size[1]
+        
+    def __call__(self, input):
+        w, h = input.size
+        if w > self.output_size[0] or h > self.output_size[1]:
+            if w > h:
+                ow = self.greater_side_size
+                oh = int( self.greater_side_size * h / w )
+                input = input.resize((ow, oh), self.interpolation)
+
+            else:
+                oh = self.greater_side_size
+                ow = int(self.greater_side_size * w / h)
+                input =  input.resize((ow, oh), self.interpolation)
+        
+        input_position = (np.asarray(self.output_size) // 2) - (np.asarray(input.size) // 2)
+
+        output = Image.new(mode=input.mode,
+                           size=self.output_size,
+                           color=self.fill)
+        
+        output.paste(input, box=tuple(input_position))
+        
+        return output
 
 
 number_of_classes = 2
 
 labels = range(number_of_classes)
 
+resize_func = ScaleDownOrPad((244,244))
+
 train_transform = ComposeJoint(
                 [
-                    # Crop to the actual view of the endoscop camera
-                    [transforms.CenterCrop((1024, 1280)), transforms.CenterCrop((1024, 1280))],
                     RandomHorizontalFlipJoint(),
-                    RandomCropJoint(crop_size=(224, 224)),
+                    lambda inputs: [resize_func(inp) for inp in inputs],
                     [transforms.ToTensor(), None],
                     [transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)), None],
                     [None, transforms.Lambda(lambda x: torch.from_numpy(np.asarray(x)).long()) ]
@@ -120,7 +154,7 @@ trainloader = torch.utils.data.DataLoader(trainset, batch_size=100,
 
 valid_transform = ComposeJoint(
                 [
-                     [transforms.CenterCrop((1024, 1280)), transforms.CenterCrop((1024, 1280))],
+                     lambda inputs: [resize_func(inp) for inp in inputs],
                      [transforms.ToTensor(), None],
                      [transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)), None],
                      [None, transforms.Lambda(lambda x: torch.from_numpy(np.asarray(x)).long()) ]
@@ -134,7 +168,7 @@ valset = LIPDataset(
 )
 
 
-val_subset_sampler = torch.utils.data.sampler.SubsetRandomSampler(range(300))
+val_subset_sampler = torch.utils.data.sampler.SubsetRandomSampler(range(1000))
 
 valset_loader = torch.utils.data.DataLoader(valset, batch_size=1, sampler=val_subset_sampler,
                                             shuffle=False, num_workers=2)
@@ -182,8 +216,8 @@ def validate():
             overall_confusion_matrix += current_confusion_matrix
 
         count += 1
-        #if count % 10 == 0:
-            #print(f"validating {count}/200")
+        if count % 100 == 0:
+            print(f"validating {count}/1000")
         
     
     
@@ -254,7 +288,7 @@ def validate_train():
 
 ## Define the model and load it to the gpu
 fcn = resnet_dilated.Resnet18_8s(num_classes=2)
-#fcn.load_state_dict(torch.load("./bestruns/resnet_18_8s_best_e60.pth"))
+fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv2.pth"))
 fcn.cuda()
 fcn.train()
 
@@ -279,7 +313,7 @@ best_validation_score = 0
 
 iter_size = 20
 with open("logfile10.txt", "a+") as file:
-    for epoch in range(200):  # loop over the dataset multiple times
+    for epoch in range(2,200):  # loop over the dataset multiple times
         
         print(f"Epoch {epoch}")
         l_epoch = len(trainloader)
