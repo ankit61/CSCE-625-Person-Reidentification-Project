@@ -39,7 +39,10 @@ from PIL import Image
 
 from sklearn.metrics import confusion_matrix
 
-torch.device = 'cpu'
+# Tensorboard 
+from tensorboardX import SummaryWriter
+
+writer = SummaryWriter('/runs/')
 
 def flatten_logits(logits, number_of_classes):
     """Flattens the logits batch except for the logits dimension"""
@@ -83,22 +86,60 @@ class LIPDataset(torch.utils.data.Dataset):
 
         if self.joint_transform is not None:
             _img, _target = self.joint_transform([_img, _target])
+        
+        #print(_img.size())
 
         _target = _target.permute(2,1,0)[0:1,:,:]
 
         #print(f"filenames called {_img.size()}:{_target.size()}")
         return _img, _target
 
+class ScaleDownOrPad(object):
+    
+    
+    def __init__(self, output_size, interpolation=Image.BILINEAR, fill=0):
+        self.interpolation = interpolation
+        self.fill = fill
+        self.output_size = output_size
+        if output_size[0] > output_size[1]:
+            self.greater_side_size = output_size[0]
+        else:
+            self.greater_side_size = output_size[1]
+        
+    def __call__(self, input):
+        w, h = input.size
+        if w > self.output_size[0] or h > self.output_size[1]:
+            if w > h:
+                ow = self.greater_side_size
+                oh = int( self.greater_side_size * h / w )
+                input = input.resize((ow, oh), self.interpolation)
+
+            else:
+                oh = self.greater_side_size
+                ow = int(self.greater_side_size * w / h)
+                input =  input.resize((ow, oh), self.interpolation)
+        
+        input_position = (np.asarray(self.output_size) // 2) - (np.asarray(input.size) // 2)
+
+        output = Image.new(mode=input.mode,
+                           size=self.output_size,
+                           color=self.fill)
+        
+        output.paste(input, box=tuple(input_position))
+        
+        return output
+
+
 number_of_classes = 2
 
 labels = range(number_of_classes)
 
+resize_func = ScaleDownOrPad((244,244))
+
 train_transform = ComposeJoint(
                 [
-                    # Crop to the actual view of the endoscop camera
-                    [transforms.CenterCrop((1024, 1280)), transforms.CenterCrop((1024, 1280))],
                     RandomHorizontalFlipJoint(),
-                    RandomCropJoint(crop_size=(224, 224)),
+                    lambda inputs: [resize_func(inp) for inp in inputs],
                     [transforms.ToTensor(), None],
                     [transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)), None],
                     [None, transforms.Lambda(lambda x: torch.from_numpy(np.asarray(x)).long()) ]
@@ -107,33 +148,30 @@ train_transform = ComposeJoint(
 trainset = LIPDataset(transform_rule=train_transform)
 
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=100,
-                                          shuffle=True, num_workers=1)
+                                          shuffle=True, num_workers=4)
 
 
-"""
+
 valid_transform = ComposeJoint(
                 [
-                     [transforms.CenterCrop((1024, 1280)), transforms.CenterCrop((1024, 1280))],
+                     lambda inputs: [resize_func(inp) for inp in inputs],
                      [transforms.ToTensor(), None],
                      [transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)), None],
                      [None, transforms.Lambda(lambda x: torch.from_numpy(np.asarray(x)).long()) ]
                 ])
 
 
-valset = Endovis_Instrument_2017(root='/home/daniil/projects/endovis/dataset/',
-                                 dataset_type=0,
-                                 joint_transform=valid_transform,
-                                 train=False)
+valset = LIPDataset(
+    transform_rule=valid_transform, 
+    trainpath = "/datasets/LIP/TrainVal_images/val_images/", 
+    targetpath = "/datasets/LIP/EDITED_TrainVal_parsing_annotations/val_segmentations/"
+)
 
-valset_loader = torch.utils.data.DataLoader(valset, batch_size=1,
+
+val_subset_sampler = torch.utils.data.sampler.SubsetRandomSampler(range(1000))
+
+valset_loader = torch.utils.data.DataLoader(valset, batch_size=1, sampler=val_subset_sampler,
                                             shuffle=False, num_workers=2)
-"""
-
-train_subset_sampler = torch.utils.data.sampler.SubsetRandomSampler(range(40))
-train_subset_loader = torch.utils.data.DataLoader(dataset=trainset, batch_size=1,
-                                                   sampler=train_subset_sampler,
-                                                   num_workers=2)
-
 
 # Define the validation function to track MIoU during the training
 def validate():
@@ -141,6 +179,12 @@ def validate():
     fcn.eval()
     
     overall_confusion_matrix = None
+
+    l_valset = len(valset_loader)
+
+    print(l_valset)
+
+    count = 0
 
     for image, annotation in valset_loader:
 
@@ -170,8 +214,15 @@ def validate():
         else:
 
             overall_confusion_matrix += current_confusion_matrix
+
+        count += 1
+        if count % 100 == 0:
+            print(f"validating {count}/1000")
+        
     
     
+     
+
     intersection = np.diag(overall_confusion_matrix)
     ground_truth_set = overall_confusion_matrix.sum(axis=1)
     predicted_set = overall_confusion_matrix.sum(axis=0)
@@ -184,7 +235,7 @@ def validate():
 
     return mean_intersection_over_union
 
-
+"""
 def validate_train():
     
     fcn.eval()
@@ -232,46 +283,12 @@ def validate_train():
     fcn.train()
 
     return mean_intersection_over_union
-
-
-# In[2]:
-
-
-#get_ipython().run_line_magic('matplotlib', 'notebook')
-
-from matplotlib import pyplot as plt
-
-
-# Create the training plot
-loss_current_iteration = 0
-loss_history = []
-loss_iteration_number_history = []
-
-validation_current_iteration = 0
-validation_history = []
-validation_iteration_number_history = []
-
-train_validation_current_iteration = 0
-train_validation_history = []
-train_validation_iteration_number_history = []
- 
-f, (loss_axis, validation_axis) = plt.subplots(2, 1)
-
-loss_axis.plot(loss_iteration_number_history, loss_history)
-validation_axis.plot(validation_iteration_number_history, validation_history, 'b',
-                     train_validation_iteration_number_history, train_validation_history, 'r')
-
-loss_axis.set_title('Training loss')
-validation_axis.set_title('MIoU on validation dataset')
-
-plt.tight_layout()
-
-
-# In[3]:
+"""
 
 
 ## Define the model and load it to the gpu
-fcn = resnet_dilated.Resnet9_8s(num_classes=2)
+fcn = resnet_dilated.Resnet18_8s(num_classes=2)
+fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv2.pth"))
 fcn.cuda()
 fcn.train()
 
@@ -286,103 +303,73 @@ fcn.train()
 ## Define the loss and load it to gpu
 #optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
 
-criterion = nn.CrossEntropyLoss(size_average=False).cuda()
+criterion = nn.CrossEntropyLoss(torch.Tensor([1.0,3.0]), size_average=False).cuda()
+
 
 optimizer = optim.Adam(fcn.parameters(), lr=0.0001, weight_decay=0.0001)
-
-
-# In[4]:
 
 
 best_validation_score = 0
 
 iter_size = 20
-
-for epoch in range(30):  # loop over the dataset multiple times
-    
-    print(f"Epoch {epoch}")
-
-    running_loss = 0.0
-    
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs
-        img, anno = data
+with open("logfile10.txt", "a+") as file:
+    for epoch in range(2,200):  # loop over the dataset multiple times
         
-        # We need to flatten annotations and logits to apply index of valid
-        # annotations. All of this is because pytorch doesn't have tf.gather_nd()
-        anno_flatten = flatten_annotations(anno)
-        index = get_valid_annotations_index(anno_flatten, mask_out_value=255)
-        anno_flatten_valid = torch.index_select(anno_flatten, 0, index)
-
-        # wrap them in Variable
-        # the index can be acquired on the gpu
-        img, anno_flatten_valid, index = Variable(img.cuda()), Variable(anno_flatten_valid.cuda()), Variable(index.cuda())
-        #img, anno_flatten_valid, index = Variable(img, Variable(anno_flatten_valid), Variable(index))
-
-        # zero the parameter gradients
-        optimizer.zero_grad()
-
-        # forward + backward + optimize
-        logits = fcn(img)
-        logits_flatten = flatten_logits(logits, number_of_classes=2)
-        logits_flatten_valid = torch.index_select(logits_flatten, 0, index)
-        
-        loss = criterion(logits_flatten_valid, anno_flatten_valid)
-        loss.backward()
-        optimizer.step()
-
-        # print statistics
-        running_loss += (loss.data[0] / logits_flatten_valid.size(0)) 
-        if i % 2 == 1:
+        print(f"Epoch {epoch}")
+        l_epoch = len(trainloader)
+        running_loss = 0.0
+        for i, data in enumerate(trainloader, 0):
+            # get the inputs
+            img, anno = data
             
-            print(f" Running loss for batchnum = {i} {running_loss}")
-            loss_history.append(running_loss / 2)
-            loss_iteration_number_history.append(loss_current_iteration)
+            # We need to flatten annotations and logits to apply index of valid
+            # annotations. All of this is because pytorch doesn't have tf.gather_nd()
+            anno_flatten = flatten_annotations(anno)
+            index = get_valid_annotations_index(anno_flatten, mask_out_value=255)
+            anno_flatten_valid = torch.index_select(anno_flatten, 0, index)
+
+            # wrap them in Variable
+            # the index can be acquired on the gpu
+            img, anno_flatten_valid, index = Variable(img.cuda()), Variable(anno_flatten_valid.cuda()), Variable(index.cuda())
+            #img, anno_flatten_valid, index = Variable(img, Variable(anno_flatten_valid), Variable(index))
+
+            # zero the parameter gradients
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            logits = fcn(img)
+            logits_flatten = flatten_logits(logits, number_of_classes=2)
+            logits_flatten_valid = torch.index_select(logits_flatten, 0, index)
             
-            loss_current_iteration += 1
+            loss = criterion(logits_flatten_valid, anno_flatten_valid)
+            loss.backward()
+            optimizer.step()
+
+            # print statistics
+            running_loss += (loss.data[0] / logits_flatten_valid.size(0)) 
+            if (i + 1) % 5 == 0:
+                
+                print(f"epoch {epoch} : {i}/{l_epoch} -> {running_loss / 5}")
+                file.write(f"epoch {epoch} : {i}/{l_epoch} -> {running_loss / 5}")
+                
+                avg_loss = running_loss / 5
+                writer.add_scalar('segmentation/total_loss' + str(epoch), avg_loss, i)
+                running_loss = 0.0
+                
             
-            loss_axis.lines[0].set_xdata(loss_iteration_number_history)
-            loss_axis.lines[0].set_ydata(loss_history)
+                
+        current_validation_score = validate()
 
-            loss_axis.relim()
-            loss_axis.autoscale_view()
-            loss_axis.figure.canvas.draw()
-            
-            running_loss = 0.0
-            
-        
-    """        
-    current_validation_score = validate()
-    validation_history.append(current_validation_score)
-    validation_iteration_number_history.append(validation_current_iteration)
-
-    validation_current_iteration += 1
-
-    validation_axis.lines[0].set_xdata(validation_iteration_number_history)
-    validation_axis.lines[0].set_ydata(validation_history)
+        print(f"TOTAL MIoU {current_validation_score}")
+        file.write(f"TOTAL MIoU {current_validation_score}")
+                
 
 
+        # Save the model if it has a better MIoU score.
+        if current_validation_score > best_validation_score:
 
-    current_train_validation_score = validate_train()
-    train_validation_history.append(current_train_validation_score)
-    train_validation_iteration_number_history.append(train_validation_current_iteration)
-
-    train_validation_current_iteration += 1
-
-    validation_axis.lines[1].set_xdata(train_validation_iteration_number_history)
-    validation_axis.lines[1].set_ydata(train_validation_history)
-
-
-    validation_axis.relim()
-    validation_axis.autoscale_view()
-    validation_axis.figure.canvas.draw()
-
-    # Save the model if it has a better MIoU score.
-    if current_validation_score > best_validation_score:
-
-        torch.save(fcn.state_dict(), 'resnet_18_8s_best.pth')
-        best_validation_score = current_validation_score
-    """ 
+            torch.save(fcn.state_dict(), f'resnet_18_8s_best_hsv{epoch}.pth')
+            best_validation_score = current_validation_score
                 
 
 print('Finished Training')

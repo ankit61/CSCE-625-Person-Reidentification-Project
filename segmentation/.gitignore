@@ -1,0 +1,6 @@
+logfile*
+resnet*
+./__pycache__
+*.png
+*.jpg
+
