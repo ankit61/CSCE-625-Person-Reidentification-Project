@@ -13,7 +13,7 @@ from torchvision import datasets, transforms
 
 from tensorboardX import SummaryWriter
 
-writer = SummaryWriter()
+writer = SummaryWriter('/runs/')
 
 
 torch.set_default_tensor_type(torch.cuda.FloatTensor)
@@ -62,6 +62,8 @@ def test(model, device, test_loader):
 
 def train(model, device, train_loader, optimizer, epoch):
     model.train()
+    batches = len(train_loader)
+    
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -74,7 +76,7 @@ def train(model, device, train_loader, optimizer, epoch):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
             writer.add_text('Text', 'text logged at step:' + str(batch_idx), batch_idx)
-            writer.add_scalar('data/scalar1', loss.item(), batch_idx)
+            writer.add_scalar('data/total_loss', loss.item(), (batches - 1) * epoch + batch_idx)
 
 def main():
     BATCH_SIZE = 128
