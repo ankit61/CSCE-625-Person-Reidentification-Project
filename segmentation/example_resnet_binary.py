@@ -64,6 +64,10 @@ def get_valid_annotations_index(flatten_annotations, mask_out_value=255):
 
 from pytorch_segmentation_detection.transforms import RandomCropJoint
 
+#class VariableSizeLoader(torch.utils.data.BatchSampler):
+  #  def __init__(self, size):
+    #    super().__init__()
+
 class LIPDataset(torch.utils.data.Dataset):
     def __init__(
         self, 
@@ -132,22 +136,24 @@ class ScaleDownOrPad(object):
 
 number_of_classes = 2
 
-labels = range(number_of_classes)
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>labels = range(number_of_classes)
 
-resize_func = ScaleDownOrPad((244,244))
+resize_func = ScaleDownOrPad((300,300))
 
 train_transform = ComposeJoint(
                 [
                     RandomHorizontalFlipJoint(),
                     lambda inputs: [resize_func(inp) for inp in inputs],
                     [transforms.ToTensor(), None],
-                    [transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)), None],
+                    [transforms.Normalize((0.35070873, 0.3755584, 0.4201221), (0.23140314, 0.23619365, 0.24928139)), None],
                     [None, transforms.Lambda(lambda x: torch.from_numpy(np.asarray(x)).long()) ]
                 ])
 
 trainset = LIPDataset(transform_rule=train_transform)
 
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=100,
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=70,
                                           shuffle=True, num_workers=4)
 
 
@@ -156,7 +162,7 @@ valid_transform = ComposeJoint(
                 [
                      lambda inputs: [resize_func(inp) for inp in inputs],
                      [transforms.ToTensor(), None],
-                     [transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)), None],
+                     [transforms.Normalize((0.35070873, 0.3755584, 0.4201221), (0.23140314, 0.23619365, 0.24928139)), None],
                      [None, transforms.Lambda(lambda x: torch.from_numpy(np.asarray(x)).long()) ]
                 ])
 
@@ -172,6 +178,8 @@ val_subset_sampler = torch.utils.data.sampler.SubsetRandomSampler(range(1000))
 
 valset_loader = torch.utils.data.DataLoader(valset, batch_size=1, sampler=val_subset_sampler,
                                             shuffle=False, num_workers=2)
+
+labels = range(number_of_classes)
 
 # Define the validation function to track MIoU during the training
 def validate():
@@ -235,60 +243,10 @@ def validate():
 
     return mean_intersection_over_union
 
-"""
-def validate_train():
-    
-    fcn.eval()
-    
-    overall_confusion_matrix = None
-
-    for image, annotation in train_subset_loader:
-
-        image = Variable(image)
-        image = Variable(image.cuda())
-        logits = fcn(image)
-
-        # First we do argmax on gpu and then transfer it to cpu
-        logits = logits.data
-        _, prediction = logits.max(1)
-        prediction = prediction.squeeze(1)
-
-        prediction_np = prediction.cpu().numpy().flatten()
-        annotation_np = annotation.numpy().flatten()
-
-        # Mask-out value is ignored by default in the sklearn
-        # read sources to see how that was handled
-
-        current_confusion_matrix = confusion_matrix(y_true=annotation_np,
-                                                    y_pred=prediction_np,
-                                                    labels=labels)
-
-        if overall_confusion_matrix is None:
-
-
-            overall_confusion_matrix = current_confusion_matrix
-        else:
-
-            overall_confusion_matrix += current_confusion_matrix
-    
-    
-    intersection = np.diag(overall_confusion_matrix)
-    ground_truth_set = overall_confusion_matrix.sum(axis=1)
-    predicted_set = overall_confusion_matrix.sum(axis=0)
-    union =  ground_truth_set + predicted_set - intersection
-
-    intersection_over_union = intersection / union.astype(np.float32)
-    mean_intersection_over_union = np.mean(intersection_over_union)
-    
-    fcn.train()
-
-    return mean_intersection_over_union
-"""
-
 
 ## Define the model and load it to the gpu
 fcn = resnet_dilated.Resnet18_8s(num_classes=2)
-fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv2.pth"))
+fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv5.pth"))
 fcn.cuda()
 fcn.train()
 
@@ -313,7 +271,7 @@ best_validation_score = 0
 
 iter_size = 20
 with open("logfile10.txt", "a+") as file:
-    for epoch in range(2,200):  # loop over the dataset multiple times
+    for epoch in range(9,200):  # loop over the dataset multiple times
         
         print(f"Epoch {epoch}")
         l_epoch = len(trainloader)
