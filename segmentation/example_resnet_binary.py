@@ -189,7 +189,7 @@ def validate():
 
     for image, annotation in valset_loader:
         
-        
+        gt_image = image
         
         image = Variable(image.cuda())
         
@@ -202,11 +202,6 @@ def validate():
         prediction = prediction.squeeze(1)
         
 
-        # pytorch tensor
-        # convert to pillow image
-        # display pillow
-
-
 
         
         # ----------------- Tensor Board Image Output --------------------------
@@ -215,14 +210,10 @@ def validate():
         # Convert to a numpy array from a torch Float Tensor
         prediction_for_output = prediction_for_output.type(torch.FloatTensor).numpy()
 
-        # Get the ground truth annotated image
-        
-        
-        
-        
+        # Add images to tensorboard
         writer.add_image('SegmentationResults/Image' + str(count) + '/Predicted', prediction_for_output, count)
         writer.add_image('SegmentationResults/Image' + str(count) + '/Ground Truth Labeled', annotation, count)
-        writer.add_image('SegmentationResults/Image' + str(count) + '/Ground Truth', image_const.Normalize(), count)
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Ground Truth', gt_image, count)
         print('Logged Image #' + str(count))
         # ----------------------------------------------------------------------
         prediction_np = prediction.cpu().numpy().flatten()
