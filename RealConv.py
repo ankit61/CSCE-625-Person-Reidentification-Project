@@ -2,6 +2,8 @@ import torch
 from math import floor
 import time
 
+torch.set_default_tensor_type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
+
 class RealConv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True):
         super(RealConv2d, self).__init__()
