@@ -24,12 +24,12 @@ for n in range(0, length):
     std[1] += temp[1][1]
     std[2] += temp[1][2]
 
-mean[0] /= length * 256.0 
-mean[1] /= length * 256.0 
-mean[2] /= length * 256.0 
-std[0] /= length * 256.0 
-std[1] /= length * 256.0 
-std[2] /= length * 256.0 
+mean[0] /= length * 255.0 
+mean[1] /= length * 255.0 
+mean[2] /= length * 255.0 
+std[0] /= length * 255.0 
+std[1] /= length * 255.0 
+std[2] /= length * 255.0 
 
 print(mean)
 print(std)
