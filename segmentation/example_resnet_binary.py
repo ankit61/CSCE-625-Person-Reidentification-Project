@@ -22,6 +22,7 @@ from pytorch_segmentation_detection.transforms import (ComposeJoint,
                                                        CropOrPad,
                                                        ResizeAspectRatioPreserve)
 
+
 import torch
 import torchvision
 import torch.nn as nn
@@ -187,8 +188,11 @@ def validate():
     count = 0
 
     for image, annotation in valset_loader:
-
+        
+        
+        
         image = Variable(image.cuda())
+        
         #image = Variable(image)
         logits = fcn(image)
 
@@ -196,7 +200,31 @@ def validate():
         logits = logits.data
         _, prediction = logits.max(1)
         prediction = prediction.squeeze(1)
+        
 
+        # pytorch tensor
+        # convert to pillow image
+        # display pillow
+
+
+
+        
+        # ----------------- Tensor Board Image Output --------------------------
+        # Move the prediction to the cpu
+        prediction_for_output = prediction.cpu()
+        # Convert to a numpy array from a torch Float Tensor
+        prediction_for_output = prediction_for_output.type(torch.FloatTensor).numpy()
+
+        # Get the ground truth annotated image
+        
+        
+        
+        
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Predicted', prediction_for_output, count)
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Ground Truth Labeled', annotation, count)
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Ground Truth', image_const.Normalize(), count)
+        print('Logged Image #' + str(count))
+        # ----------------------------------------------------------------------
         prediction_np = prediction.cpu().numpy().flatten()
         annotation_np = annotation.numpy().flatten()
 
@@ -288,7 +316,7 @@ def validate_train():
 
 ## Define the model and load it to the gpu
 fcn = resnet_dilated.Resnet18_8s(num_classes=2)
-fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv2.pth"))
+fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv29.pth"))
 fcn.cuda()
 fcn.train()
 
@@ -319,6 +347,7 @@ with open("logfile10.txt", "a+") as file:
         l_epoch = len(trainloader)
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
+            current_validation_score = validate()
             # get the inputs
             img, anno = data
             
