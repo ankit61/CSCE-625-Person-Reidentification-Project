@@ -19,9 +19,9 @@ writer = SummaryWriter("/runs/")
 
 torch.set_default_tensor_type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
 
-input_size = (182, 74)
-mean = [0.40548764, 0.40282342, 0.41518331]
-std = [0.19952237, 0.200509333, 0.20576845]
+input_size = (128, 48)
+mean = [0.43000786, 0.42752744, 0.44254043]
+std = [0.24018411, 0.24295865, 0.24844268]
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg19_bn')
@@ -33,7 +33,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 					help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=64, type=int,
 					metavar='N', help='mini-batch size (default: 64)')
-parser.add_argument('--lr', '--learning-rate', default=0.05, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.001, type=float,
 					metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 					help='momentum')
@@ -66,7 +66,7 @@ def main():
 	if not os.path.exists(args.save_dir):
 		os.makedirs(args.save_dir)
 
-	model = CAE()
+	model = CAE(input_size)
 
 	# model.features = torch.nn.DataParallel(model.features)
 	model.cuda()
@@ -194,7 +194,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 				  'Loss {loss.val:.4f} ({loss.avg:.4f})'.format(
 					  epoch, i, len(train_loader), batch_time=batch_time,
 					  data_time=data_time, loss=losses))
-			writer.add_scalar('/runs/cae/epoch' + str(epoch), loss.item(), i)
+			writer.add_scalar('/runs/cae/all' , loss.item(), epoch * len(train_loader) + i)
 
 def validate(val_loader, model, criterion):
 	"""

@@ -13,9 +13,9 @@ class PReIDDataset(torch.utils.data.Dataset):
 		self, 
 		load,
 		transform=None, 
-		trainPath = "/datasets/PReID/train/",
-		valPath = "/datasets/PReID/val/",
-		testPath = "/datasets/PReID/test/"
+		trainPath = "/datasets/VIPeR/cam_a/",
+		valPath = "/datasets/VIPeR/cam_b/",
+		testPath = "/datasets/VIPeR/cam_b/"
 	):
 		if(load == DatasetType.TRAIN):
 			self.imgfilenames = sorted([filename for _, _, filename in os.walk(trainPath)][0])
