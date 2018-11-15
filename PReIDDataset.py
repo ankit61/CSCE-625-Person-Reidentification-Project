@@ -37,7 +37,7 @@ class PReIDDataset(torch.utils.data.Dataset):
 		img = Image.open(os.path.join(self.path, self.imgfilenames[key])).convert('RGB')
 
 		if self.transform is not None:
-			img = self.transform([img])
+			img = self.transform(img)
 		
 		#print(_img.size())
 

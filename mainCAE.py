@@ -19,6 +19,10 @@ writer = SummaryWriter("/runs/")
 
 torch.set_default_tensor_type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
 
+input_size = (182, 74)
+mean = [0.40548764, 0.40282342, 0.41518331]
+std = [0.19952237, 0.200509333, 0.20576845]
+
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg19_bn')
 parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
@@ -50,11 +54,12 @@ parser.add_argument('--test-freq', dest='test_freq',
 parser.add_argument('--reg-const', dest='reg_const',
 					help='regularization const encouraging sparsity',
 					type=int, default=5)
-best_prec1 = 0
+
+best_loss = 100000
 
 
 def main():
-	global args, best_prec1
+	global args, best_loss
 	args = parser.parse_args()
 
 	# Check the save_dir exists or not
@@ -72,7 +77,7 @@ def main():
 			print("=> loading checkpoint '{0}'".format(args.resume))
 			checkpoint = torch.load(args.resume)
 			args.start_epoch = checkpoint['epoch']
-			best_prec1 = checkpoint['best_prec1']
+			best_loss = checkpoint['best_loss']
 			model.load_state_dict(checkpoint['state_dict'])
 			print("=> loaded checkpoint '{}' (epoch {})"
 				  .format(args.evaluate, checkpoint['epoch']))
@@ -81,13 +86,13 @@ def main():
 
 	cudnn.benchmark = True
 
-	normalize = transforms.Normalize(mean=[0.40548764, 0.40282342, 0.41518331],
-									 std=[0.19952237, 0.200509333, 0.20576845])
+	normalize = transforms.Normalize(mean=mean,
+									 std=std)
 
 	train_loader = torch.utils.data.DataLoader(
 		PReIDDataset(DatasetType.TRAIN, transform=transforms.Compose([
 			transforms.RandomHorizontalFlip(),
-			 transforms.Resize((182, 74)),
+			 transforms.Resize(input_size),
 			transforms.ToTensor(),
 			normalize,
 		])),
@@ -96,7 +101,7 @@ def main():
 
 	val_loader = torch.utils.data.DataLoader(
 		PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
-			 transforms.Resize((182, 74)),
+			 transforms.Resize(input_size),
 			transforms.ToTensor(),
 			normalize,
 		])),
@@ -105,7 +110,7 @@ def main():
 
 	test_loader = torch.utils.data.DataLoader(
 		PReIDDataset(DatasetType.TEST, transform=transforms.Compose([
-#			 transforms.Resize((224, 224)),
+			 transforms.Resize(input_size),
 			transforms.ToTensor(),
 			normalize,
 		])),
@@ -128,16 +133,16 @@ def main():
 		train(train_loader, model, criterion, optimizer, epoch)
 
 		# evaluate on validation set
-		prec1 = validate(val_loader, model, criterion)
+		loss = validate(val_loader, model, criterion)
 
 		# remember best prec@1 and save checkpoint
-		is_best = prec1 > best_prec1
-		best_prec1 = max(prec1, best_prec1)
-		save_checkpoint({
-			'epoch': epoch + 1,
-			'state_dict': model.state_dict(),
-			'best_prec1': best_prec1,
-		}, is_best, filename=os.path.join(args.save_dir, 'checkpoint_{}.tar'.format(epoch)))
+		if(loss < best_loss):
+			best_prec1 = max(loss, best_loss)
+			save_checkpoint({
+				'epoch': epoch + 1,
+				'state_dict': model.state_dict(),
+				'loss': best_loss,
+			}, True, filename=os.path.join(args.save_dir, 'checkpoint_{}.tar'.format(epoch)))
 
 		if(epoch % args.test_freq == 0 and epoch > args.start_epoch):
 			validate(test_loader, model, criterion) 
@@ -227,10 +232,7 @@ def validate(val_loader, model, criterion):
 				  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
 				  .format(i, len(val_loader), batch_time=batch_time, loss=losses))
 
-	print(' * Prec@1 {top1.avg:.3f}'
-		  .format(top1=top1))
-
-	return top1.avg
+	return losses.avg
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
 	"""

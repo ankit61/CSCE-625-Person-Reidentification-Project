@@ -6,10 +6,10 @@ class BasicDecoderBlock(nn.Module):
 
 	def __init__(self, inplanes, planes, stride=1, upsample=None):
 		super(BasicDecoderBlock, self).__init__()
-		self.conv1 = nn.ConvTranspose2d(inplanes, planes, kernel_size=3, stride=stride)	  
+		self.conv1 = nn.ConvTranspose2d(inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=False)	  
 		self.bn1 = nn.BatchNorm2d(planes)
 		self.relu = nn.ReLU(inplace=True)
-		self.conv2 = nn.ConvTranspose2d(planes, planes, kernel_size=3)
+		self.conv2 = nn.ConvTranspose2d(planes, planes, kernel_size=3, padding=1, bias=False)
 		self.bn2 = nn.BatchNorm2d(planes)
 		self.upsample = upsample
 		self.stride = stride
@@ -34,9 +34,10 @@ class BasicDecoderBlock(nn.Module):
 
 class ResNetDecoder(nn.Module):
 
-	def __init__(self, block, layers):
-		self.inplanes = 512
+	def __init__(self, block, layers, out_size = (182, 74)):
 		super(ResNetDecoder, self).__init__()
+		self.inplanes = 512
+		self.out_size = out_size
 		self.conv1 = nn.ConvTranspose2d(64, 3, kernel_size=7, stride=2, padding=3, bias=False)
 		self.bn1 = nn.BatchNorm2d(64)
 		self.layer1 = self._make_layer(block, 512, layers[0])
@@ -73,10 +74,11 @@ class ResNetDecoder(nn.Module):
 		x = self.layer2(x)
 		x = self.layer3(x)
 		x = self.layer4(x)
-
+		
 		x = self.bn1(x)
 		x = self.conv1(x)
-		return x
+
+		return torch.nn.functional.upsample_bilinear(x, self.out_size)
 
 def resnetDecoder9(**kwargs):
 	return ResNetDecoder(BasicDecoderBlock, [1, 1, 1, 1], **kwargs)
