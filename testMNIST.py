@@ -79,8 +79,8 @@ def train(model, device, train_loader, optimizer, epoch):
             writer.add_scalar('data/total_loss', loss.item(), (batches - 1) * epoch + batch_idx)
 
 def main():
-    BATCH_SIZE = 256
-    EPOCHS = 300
+    BATCH_SIZE = 128
+    EPOCHS = 50
     LEARNING_RATE = .001
 
     MOMENTUM = .02
