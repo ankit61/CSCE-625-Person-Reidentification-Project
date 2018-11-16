@@ -30,6 +30,9 @@ import pytorch_segmentation_detection.models.fcn as fcns
 from pytorch_segmentation_detection.datasets.endovis_instrument_2017 import Endovis_Instrument_2017
 import sys
 import os
+sys.path.append('../')
+
+
 sys.path.append("/pytorch-segmentation/pytorch-segmentation-detection/")
 sys.path.insert(
     0, '/pytorch-segmentation/pytorch-segmentation-detection/vision/')
