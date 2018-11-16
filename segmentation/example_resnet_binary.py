@@ -209,9 +209,10 @@ def validate():
     count = 0
 
     for image, annotation in valset_loader:
-
-        gt_image = image.cpu().type(torch.FloatTensor).numpy()
-        annotation_image = annotation.cpu().type(torch.FloatTensor).numpy()
+        # Store raw image
+        gt_image = np.array(image.cpu()[0].type(torch.FloatTensor).numpy())
+        # Reshape the annotation image into the orignial size
+        annotation_image = np.array(annotation.cpu()[0].permute(0, 2, 1).type(torch.FloatTensor).numpy())
         image = Variable(image.cuda())
 
         #image = Variable(image)
@@ -222,32 +223,23 @@ def validate():
         _, prediction = logits.max(1)
         prediction = prediction.squeeze(1)
 
+
         # ----------------- Tensor Board Image Output --------------------------
-        # Move the prediction to the cpu
-        prediction_for_output = prediction.cpu()
-        # Convert to a numpy array from a torch Float Tensor
-        prediction_for_output = prediction_for_output.type(
-            torch.FloatTensor).numpy()
+        # Move the prediction to the cpu, convert it to a tensor, and then to a PIL image
+        prediction_for_output = np.array(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor).numpy())
 
-
-    
-
+        
+        # 
+        
         # Denormalize the original image (channelwise * std + mean )
-        gt_image[:, 0, :, :] = gt_image[:, 0, :, :] * valid_stddev[0] + valid_mean[0]
-        gt_image[:, 1, :, :] = gt_image[:, 1, :, :] * valid_stddev[1] + valid_mean[1]
-        gt_image[:, 2, :, :] = gt_image[:, 2, :, :] * valid_stddev[2] + valid_mean[2]
-    
-
-
-
+        gt_image[ 0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
+        gt_image[1, :, :] = gt_image[1, :, :] * valid_stddev[1] + valid_mean[1]
+        gt_image[2, :, :] = gt_image[2, :, :] * valid_stddev[2] + valid_mean[2]
 
         # Add images to tensorboard
-        writer.add_image('SegmentationResults/Image' + str(count) +
-                         '/Predicted', prediction_for_output, count)
-        writer.add_image('SegmentationResults/Image' + str(count) +
-                         '/Ground Truth', annotation, count)
-        writer.add_image('SegmentationResults/Image' +
-                         str(count) + '/Original', gt_image, count)
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Predicted', prediction_for_output, count)
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Ground Truth', annotation_image, count)
+        writer.add_image('SegmentationResults/Image' + str(count) + '/Original', gt_image, count)
         print('Logged Image #' + str(count))
         # ----------------------------------------------------------------------
         prediction_np = prediction.cpu().numpy().flatten()
