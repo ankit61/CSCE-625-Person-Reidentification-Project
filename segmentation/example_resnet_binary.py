@@ -3,9 +3,15 @@
 
 # In[1]:
 
-
+import sys
+import os
 #get_ipython().run_line_magic('matplotlib', 'notebook')
+sys.path.append('../')
 
+
+sys.path.append("/pytorch-segmentation/pytorch-segmentation-detection/")
+sys.path.insert(
+    0, '/pytorch-segmentation/pytorch-segmentation-detection/vision/')
 from pytorch_segmentation_detection.transforms import RandomCropJoint
 from tensorboardX import SummaryWriter
 from sklearn.metrics import confusion_matrix
@@ -28,14 +34,8 @@ from pytorch_segmentation_detection.transforms import (ComposeJoint,
 import pytorch_segmentation_detection.models.resnet_dilated as resnet_dilated
 import pytorch_segmentation_detection.models.fcn as fcns
 from pytorch_segmentation_detection.datasets.endovis_instrument_2017 import Endovis_Instrument_2017
-import sys
-import os
-sys.path.append('../')
 
 
-sys.path.append("/pytorch-segmentation/pytorch-segmentation-detection/")
-sys.path.insert(
-    0, '/pytorch-segmentation/pytorch-segmentation-detection/vision/')
 
 # Use second GPU -pytorch-segmentation-detection- change if you want to use a first one
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
@@ -210,8 +210,8 @@ def validate():
 
     for image, annotation in valset_loader:
 
-        gt_image = image.cpu()
-
+        gt_image = image.cpu().type(torch.FloatTensor).numpy()
+        annotation_image = annotation.cpu().type(torch.FloatTensor).numpy()
         image = Variable(image.cuda())
 
         #image = Variable(image)
@@ -229,15 +229,15 @@ def validate():
         prediction_for_output = prediction_for_output.type(
             torch.FloatTensor).numpy()
 
-		input_var = torch.autograd.Variable(input_img, volatile=True).cuda()
-		target_var = torch.autograd.Variable(target, volatile=True)
 
+    
 
-		gt_image[:, 0, :, :] = gt_image[:, 0, :, :] * std[0] + mean[0]
-		gt_image[:, 1, :, :] = gt_image[:, 1, :, :] * std[1] + mean[1]
-		gt_image[:, 2, :, :] = gt_image[:, 2, :, :] * std[2] + mean[2]
-		#img = utils.make_grid(torch.cat((gt_image, output), 0), nrow=2)
-		
+        # Denormalize the original image (channelwise * std + mean )
+        gt_image[:, 0, :, :] = gt_image[:, 0, :, :] * valid_stddev[0] + valid_mean[0]
+        gt_image[:, 1, :, :] = gt_image[:, 1, :, :] * valid_stddev[1] + valid_mean[1]
+        gt_image[:, 2, :, :] = gt_image[:, 2, :, :] * valid_stddev[2] + valid_mean[2]
+    
+
 
 
 
@@ -317,6 +317,7 @@ with open("logfile10.txt", "a+") as file:
         print(f"Epoch {epoch}")
         l_epoch = len(trainloader)
         running_loss = 0.0
+        current_validation_score = validate()
         for i, data in enumerate(trainloader, 0):
             
             # get the inputs
@@ -360,7 +361,7 @@ with open("logfile10.txt", "a+") as file:
                                   str(epoch), avg_loss, i)
                 running_loss = 0.0
 
-        current_validation_score = validate()
+                current_validation_score = validate()
 
         print(f"TOTAL MIoU {current_validation_score}")
         file.write(f"TOTAL MIoU {current_validation_score}")
