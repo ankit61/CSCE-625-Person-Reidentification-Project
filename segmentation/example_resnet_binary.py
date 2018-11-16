@@ -210,7 +210,7 @@ def validate():
 
     for image, annotation in valset_loader:
 
-        gt_image = image
+        gt_image = image.cpu()
 
         image = Variable(image.cuda())
 
@@ -229,13 +229,25 @@ def validate():
         prediction_for_output = prediction_for_output.type(
             torch.FloatTensor).numpy()
 
+		input_var = torch.autograd.Variable(input_img, volatile=True).cuda()
+		target_var = torch.autograd.Variable(target, volatile=True)
+
+
+		gt_image[:, 0, :, :] = gt_image[:, 0, :, :] * std[0] + mean[0]
+		gt_image[:, 1, :, :] = gt_image[:, 1, :, :] * std[1] + mean[1]
+		gt_image[:, 2, :, :] = gt_image[:, 2, :, :] * std[2] + mean[2]
+		#img = utils.make_grid(torch.cat((gt_image, output), 0), nrow=2)
+		
+
+
+
         # Add images to tensorboard
         writer.add_image('SegmentationResults/Image' + str(count) +
                          '/Predicted', prediction_for_output, count)
         writer.add_image('SegmentationResults/Image' + str(count) +
-                         '/Ground Truth Labeled', annotation, count)
+                         '/Ground Truth', annotation, count)
         writer.add_image('SegmentationResults/Image' +
-                         str(count) + '/Ground Truth', gt_image, count)
+                         str(count) + '/Original', gt_image, count)
         print('Logged Image #' + str(count))
         # ----------------------------------------------------------------------
         prediction_np = prediction.cpu().numpy().flatten()

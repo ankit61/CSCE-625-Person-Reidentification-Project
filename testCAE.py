@@ -45,7 +45,6 @@ def test(val_loader, model):
 			writer.add_image("cae/images/im_" + str(i), img, i)
 
 def main():
-
 	model_path = sys.argv[1]
 	checkpoint = torch.load(model_path)
 	model = CAE(img_size)
