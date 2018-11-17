@@ -1,4 +1,5 @@
 import torch
+import torch.utils.data
 import os
 from enum import Enum
 from PIL import Image
@@ -13,9 +14,9 @@ class PReIDDataset(torch.utils.data.Dataset):
 		self, 
 		load,
 		transform=None, 
-		trainPath = "/datasets/VIPeR/cam_a/",
-		valPath = "/datasets/VIPeR/cam_b/",
-		testPath = "/datasets/VIPeR/cam_b/"
+		trainPath = "/datasets/DukeMTMC-reID/bounding_box_train/train",
+		valPath = "/datasets/DukeMTMC-reID/bounding_box_train/val",
+		testPath = "/datasets/DukeMTMC-reID/bounding_box_test/"
 	):
 		if(load == DatasetType.TRAIN):
 			self.imgfilenames = sorted([filename for _, _, filename in os.walk(trainPath)][0])

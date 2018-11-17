@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import os
 import shutil
@@ -19,15 +20,15 @@ writer = SummaryWriter("/runs/")
 
 torch.set_default_tensor_type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
 
-input_size = (128, 48)
-mean = [0.43000786, 0.42752744, 0.44254043]
-std = [0.24018411, 0.24295865, 0.24844268]
+input_size = (218, 85)
+mean = [0.43993556, 0.43089762, 0.44579148]
+std = [0.19977007, 0.20279744, 0.19051233]
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg19_bn')
 parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
 					help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=300, type=int, metavar='N',
+parser.add_argument('--epochs', default=1000, type=int, metavar='N',
 					help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 					help='manual epoch number (useful on restarts)')
@@ -50,12 +51,19 @@ parser.add_argument('--save-dir', dest='save_dir',
 					default='trained_resnets', type=str)
 parser.add_argument('--test-freq', dest='test_freq',
 					help='number of epochs to test on entire testing dataset',
-					type=int, default=20)
+					type=int, default=20000)
 parser.add_argument('--reg-const', dest='reg_const',
 					help='regularization const encouraging sparsity',
-					type=int, default=5)
+					type=int, default=1)
 
-best_loss = 100000
+best_loss = 200
+
+def MaxSqError(pred, model, target):
+	if(pred.size() == target.size() and pred.dim() == 4):
+		diff = (pred - target).pow(2).view(pred.size(0), pred.size(1), -1).max(2)[0]
+		return diff.sum() + args.reg_const *  torch.mean(torch.abs(model.code))#.mean(0).sum()
+	else:
+		raise Exception("pred and target must have 4D with same size")
 
 
 def main():
@@ -77,7 +85,7 @@ def main():
 			print("=> loading checkpoint '{0}'".format(args.resume))
 			checkpoint = torch.load(args.resume)
 			args.start_epoch = checkpoint['epoch']
-			best_loss = checkpoint['best_loss']
+			best_loss = checkpoint['loss']
 			model.load_state_dict(checkpoint['state_dict'])
 			print("=> loaded checkpoint '{}' (epoch {})"
 				  .format(args.evaluate, checkpoint['epoch']))
@@ -118,7 +126,7 @@ def main():
 		num_workers=args.workers, pin_memory=True)
 
 	# define loss function (criterion) and pptimizer
-	criterion = nn.MSELoss().cuda()
+	criterion = MaxSqError#nn.MSELoss().cuda()
 
 	optimizer = torch.optim.Adam(model.parameters(), args.lr)
 
@@ -134,10 +142,12 @@ def main():
 
 		# evaluate on validation set
 		loss = validate(val_loader, model, criterion)
+		
+		writer.add_scalar('/runs/cae/validationLoss' , loss.item(), epoch)
 
 		# remember best prec@1 and save checkpoint
 		if(loss < best_loss):
-			best_prec1 = max(loss, best_loss)
+			best_loss = min(loss, best_loss)
 			save_checkpoint({
 				'epoch': epoch + 1,
 				'state_dict': model.state_dict(),
@@ -170,8 +180,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
 		# compute output
 		output = model(input_var)
-		loss = criterion(output, target_var)
-		loss += args.reg_const * torch.sum(torch.abs(model.code))  #make code sparse
+		loss = criterion(output, model, target_var)
 
 		# compute gradient and do SGD step
 		optimizer.zero_grad()
@@ -214,7 +223,7 @@ def validate(val_loader, model, criterion):
 
 		# compute output
 		output = model(input_var)
-		loss = criterion(output, target_var)
+		loss = criterion(output, model, target_var)
 
 		output = output.float()
 		loss = loss.float()
@@ -260,6 +269,9 @@ class AverageMeter(object):
 
 def adjust_learning_rate(optimizer, epoch):
 	"""Sets the learning rate to the initial LR decayed by 2 every 30 epochs"""
+	#if(epoch > 10):
+	#	lr = args.lr * 1e-8 * (0.5 ** (epoch // 30))
+	#else:
 	lr = args.lr * (0.5 ** (epoch // 30))
 	for param_group in optimizer.param_groups:
 		param_group['lr'] = lr

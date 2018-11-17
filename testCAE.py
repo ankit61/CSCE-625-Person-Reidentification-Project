@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from CAE import CAE
 import sys
 import matplotlib.pyplot as plt
@@ -52,7 +53,7 @@ model.cuda()
 model.load_state_dict(checkpoint['state_dict'])
 
 val_loader = torch.utils.data.DataLoader(
-		PReIDDataset(DatasetType.TRAIN, transform=transforms.Compose([
+		PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
 			transforms.Resize(img_size),
 			transforms.ToTensor(),
 			transforms.Normalize(mean=mean, std=std),
