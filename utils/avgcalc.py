@@ -15,11 +15,11 @@ size = [0,0];
 
 length = len(image_names)
 
-for n in range(0, length):
-	
-	im = cv2.imread(path + image_names[n])
+for n in range(0, length)
+	im = cv2.imread(os.path.join(path + image_names[n]))
+	if(im is None):
+		raise Exception("incorrect path: " + os.path.join(path + image_names[n]))
 	temp  = cv2.meanStdDev(im)	  
-
 	mean[0] += temp[0][0]
 	mean[1] += temp[0][1]
 	mean[2] += temp[0][2]
