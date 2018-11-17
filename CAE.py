@@ -1,5 +1,5 @@
 import torch
-import resnet as models
+import torchvision.models as models
 import resnetDecoder
 
 class CAE(torch.nn.Module):
