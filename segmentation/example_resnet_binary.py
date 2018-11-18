@@ -15,6 +15,7 @@ sys.path.insert(
 from pytorch_segmentation_detection.transforms import RandomCropJoint
 from tensorboardX import SummaryWriter
 from sklearn.metrics import confusion_matrix
+import PIL
 from PIL import Image
 import numpy as np
 from matplotlib import pyplot as plt
@@ -70,6 +71,14 @@ def get_valid_annotations_index(flatten_annotations, mask_out_value=255):
  #  def __init__(self, size):
    #    super().__init__()
 
+def transform_test_image(img):
+    test_size_func = ScaleDownOrPad((244, 244))
+    
+    img = torch.from_numpy(np.asarray(test_size_func(img))).float()
+    
+    img = transforms.Normalize(valid_mean, valid_stddev).__call__(img)
+
+    return img
 
 class LIPDataset(torch.utils.data.Dataset):
     def __init__(self, transform_rule=None, trainpath="/datasets/LIP/TrainVal_images/train_images/", targetpath="/datasets/LIP/EDITED_TrainVal_parsing_annotations/train_segmentations/"
@@ -103,25 +112,25 @@ class LIPDataset(torch.utils.data.Dataset):
         return _img, _target
 
 class TestDataset(torch.utils.data.Dataset):
-    def __init__( self, transform_rule, inputpath, output_path):
+    def __init__( self, inputpath, output_path):
         self.inputpath = inputpath
         self.output_path = output_path
         self.imgfilenames = sorted(
             [filename for _, _, filename in os.walk(inputpath)][0])
-        self.transform_rule = transform_rule
 
     def __len__(self):
         return len(self.imgfilenames)
 
     def __getitem__(self, key):
         _img = Image.open(
-            self.inputpath + self.imgfilenames[key]).convert('RGB')
+            self.inputpath + self.imgfilenames[key])
         
-        _img = self.transform_rule(_img)
+        _img, _ = valid_transform([_img, _img])
 
         # convert to tensor to be used by pytorch
-        _img = _img.permute(2, 1, 0)
-        print(_img.shape)
+        
+        #_img = _img.permute(2, 1, 0)
+        #print(_img.shape)
         return _img
 
 class ScaleDownOrPad(object):
@@ -209,16 +218,35 @@ valset_loader = torch.utils.data.DataLoader(valset, batch_size=1, sampler=val_su
                                             shuffle=False, num_workers=2)
 
 labels = range(number_of_classes)
-def transform_test_image(img):
-    test_size_func = ScaleDownOrPad((218, 85))
-    img = torch.from_numpy(np.asarray(test_size_func(img))).float()
-    return img
+
+# Define the model and load it to the gpu
+fcn = resnet_dilated.Resnet18_8s(num_classes=2)
+fcn.load_state_dict(torch.load("./run2/best.pth"))
+fcn.cuda()
+fcn.train()
+
+# Uncomment to preserve BN statistics
+# fcn.eval()
+# for m in fcn.modules():
+
+#     if isinstance(m, nn.BatchNorm2d):
+#         m.weight.requires_grad = False
+#         m.bias.requires_grad = False
+
+# Define the loss and load it to gpu
+#optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
+
+criterion = nn.CrossEntropyLoss(torch.Tensor(
+    [1.0, 3.0]), size_average=False).cuda()
+
+
+optimizer = optim.Adam(fcn.parameters(), lr=0.0001, weight_decay=0.0001)
 
 
 def process_images(dataset_dir, processed_dir):
     
     
-    dataset = TestDataset(transform_rule=transform_test_image, inputpath=dataset_dir, output_path=processed_dir)
+    dataset = TestDataset(inputpath=dataset_dir, output_path=processed_dir)
 
     images_to_process = torch.utils.data.DataLoader(dataset, batch_size=1, 
                                             shuffle=False, num_workers=1)
@@ -226,7 +254,7 @@ def process_images(dataset_dir, processed_dir):
     num_of_images = len(images_to_process)
     count = 0
     for image in images_to_process:
-        orig_img = image
+        gt_image = np.array(image.cpu()[0].type(torch.FloatTensor).numpy())
         image = Variable(image.cuda())
 
         #image = Variable(image)
@@ -237,10 +265,16 @@ def process_images(dataset_dir, processed_dir):
         _, prediction = logits.max(1)
         prediction = prediction.squeeze(1)
         
-        prediction_for_output = np.array(prediction.cpu().permute(0, 1, 2).type(torch.FloatTensor).numpy())
+        prediction_for_output = np.array(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor).numpy())
+
+        gt_image[ 0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
+        gt_image[1, :, :] = gt_image[1, :, :] * valid_stddev[1] + valid_mean[1]
+        gt_image[2, :, :] = gt_image[2, :, :] * valid_stddev[2] + valid_mean[2]
+        
+                
 
         writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
-        writer.add_image('DUKESegmented/Image' + str(count) + '/Original', orig_img, count)
+        writer.add_image('DUKESegmented/Image' + str(count) + '/Original', gt_image, count)
         count += 1
 
 # Define the validation function to track MIoU during the training
@@ -323,30 +357,6 @@ def validate():
     fcn.train()
 
     return mean_intersection_over_union
-
-
-# Define the model and load it to the gpu
-fcn = resnet_dilated.Resnet18_8s(num_classes=2)
-fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv29.pth"))
-fcn.cuda()
-fcn.train()
-
-# Uncomment to preserve BN statistics
-# fcn.eval()
-# for m in fcn.modules():
-
-#     if isinstance(m, nn.BatchNorm2d):
-#         m.weight.requires_grad = False
-#         m.bias.requires_grad = False
-
-# Define the loss and load it to gpu
-#optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
-
-criterion = nn.CrossEntropyLoss(torch.Tensor(
-    [1.0, 3.0]), size_average=False).cuda()
-
-
-optimizer = optim.Adam(fcn.parameters(), lr=0.0001, weight_decay=0.0001)
 
 def start_training():
 
