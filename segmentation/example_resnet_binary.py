@@ -282,12 +282,13 @@ def process_images(dataset_dir, processed_dir):
         #gt_image = gt_image[:, :, :].copy()
         #prediction_for_output= np.transpose(prediction_for_output, (2, 0, 1) )
 
-        print(gt_image.size)
-        print(prediction_for_output.size)
+        #print(gt_image.size)
+        #print(prediction_for_output.size)
 
         #masked = cv2.bitwise_and(prediction_for_output, gt_image, mask=gt_image)
         
-        comp = Image.composite(gt_image, gt_image, prediction_for_output)
+        comp = Image.new('RGB', (300, 300))
+        comp.paste(gt_image, mask=prediction_for_output)
         comp.save(processed_dir + name[0])
 
         #writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
