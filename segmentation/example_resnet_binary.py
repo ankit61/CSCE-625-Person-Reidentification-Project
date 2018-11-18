@@ -17,6 +17,7 @@ from tensorboardX import SummaryWriter
 from sklearn.metrics import confusion_matrix
 import PIL
 from PIL import Image
+import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import random
@@ -267,18 +268,32 @@ def process_images(dataset_dir, processed_dir):
         _, prediction = logits.max(1)
         prediction = prediction.squeeze(1)
         
-        prediction_for_output = transforms.ToPILImage()(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor))
-
+        prediction_for_output = transforms.ToPILImage()(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor)).convert('L')
+        #prediction_for_output = prediction_for_output[:, :, 0:1].copy()
         gt_image[0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
         gt_image[1, :, :] = gt_image[1, :, :] * valid_stddev[1] + valid_mean[1]
         gt_image[2, :, :] = gt_image[2, :, :] * valid_stddev[2] + valid_mean[2]
+
+        f = np.vectorize(lambda x: np.uint8(x*255))
+        gt_image = f(gt_image).copy()
+        gt_image = np.transpose(gt_image, (1,2,0))
+        gt_image = transforms.ToPILImage()(gt_image).convert('RGB')
+
+        #gt_image = gt_image[:, :, :].copy()
+        #prediction_for_output= np.transpose(prediction_for_output, (2, 0, 1) )
+
+        print(gt_image.size)
+        print(prediction_for_output.size)
+
+        #masked = cv2.bitwise_and(prediction_for_output, gt_image, mask=gt_image)
         
-                
+        comp = Image.composite(gt_image, gt_image, prediction_for_output)
+        comp.save(processed_dir + name[0])
 
         #writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
         #writer.add_image('DUKESegmented/Image' + str(count) + '/Original', gt_image, count)
-        im = prediction_for_output
-        im.save(processed_dir + name[0])
+        #cv2.imwrite(processed_dir + name[0], np.transpose(masked, (1,2,0)))
+
         count += 1
 
 # Define the validation function to track MIoU during the training
