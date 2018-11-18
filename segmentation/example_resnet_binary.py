@@ -122,6 +122,8 @@ class TestDataset(torch.utils.data.Dataset):
         return len(self.imgfilenames)
 
     def __getitem__(self, key):
+        
+        
         _img = Image.open(
             self.inputpath + self.imgfilenames[key])
         
@@ -131,7 +133,7 @@ class TestDataset(torch.utils.data.Dataset):
         
         #_img = _img.permute(2, 1, 0)
         #print(_img.shape)
-        return _img
+        return _img, self.imgfilenames[key]
 
 class ScaleDownOrPad(object):
 
@@ -253,7 +255,7 @@ def process_images(dataset_dir, processed_dir):
     fcn.eval()
     num_of_images = len(images_to_process)
     count = 0
-    for image in images_to_process:
+    for image, name in images_to_process:
         gt_image = np.array(image.cpu()[0].type(torch.FloatTensor).numpy())
         image = Variable(image.cuda())
 
@@ -265,16 +267,18 @@ def process_images(dataset_dir, processed_dir):
         _, prediction = logits.max(1)
         prediction = prediction.squeeze(1)
         
-        prediction_for_output = np.array(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor).numpy())
+        prediction_for_output = transforms.ToPILImage()(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor))
 
-        gt_image[ 0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
+        gt_image[0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
         gt_image[1, :, :] = gt_image[1, :, :] * valid_stddev[1] + valid_mean[1]
         gt_image[2, :, :] = gt_image[2, :, :] * valid_stddev[2] + valid_mean[2]
         
                 
 
-        writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
-        writer.add_image('DUKESegmented/Image' + str(count) + '/Original', gt_image, count)
+        #writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
+        #writer.add_image('DUKESegmented/Image' + str(count) + '/Original', gt_image, count)
+        im = prediction_for_output
+        im.save(processed_dir + name[0])
         count += 1
 
 # Define the validation function to track MIoU during the training
