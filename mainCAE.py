@@ -14,6 +14,7 @@ import torchvision.transforms as transforms
 from PReIDDataset import PReIDDataset
 from PReIDDataset import DatasetType
 from CAE import CAE
+from MaxSqError import MaxSqError
 from tensorboardX import SummaryWriter
 
 writer = SummaryWriter("/runs/")
@@ -58,14 +59,6 @@ parser.add_argument('--reg-const', dest='reg_const',
 
 best_loss = 200
 
-def MaxSqError(pred, model, target):
-	if(pred.size() == target.size() and pred.dim() == 4):
-		diff = (pred - target).pow(2).view(pred.size(0), pred.size(1), -1).max(2)[0]
-		return diff.sum() + args.reg_const *  torch.mean(torch.abs(model.code))#.mean(0).sum()
-	else:
-		raise Exception("pred and target must have 4D with same size")
-
-
 def main():
 	global args, best_loss
 	args = parser.parse_args()
@@ -94,8 +87,7 @@ def main():
 
 	cudnn.benchmark = True
 
-	normalize = transforms.Normalize(mean=mean,
-									 std=std)
+	normalize = transforms.Normalize(mean=mean, std=std)
 
 	train_loader = torch.utils.data.DataLoader(
 		PReIDDataset(DatasetType.TRAIN, transform=transforms.Compose([
@@ -126,7 +118,7 @@ def main():
 		num_workers=args.workers, pin_memory=True)
 
 	# define loss function (criterion) and pptimizer
-	criterion = MaxSqError#nn.MSELoss().cuda()
+	criterion = MaxSqError(args.reg_const)
 
 	optimizer = torch.optim.Adam(model.parameters(), args.lr)
 
@@ -137,13 +129,16 @@ def main():
 	for epoch in range(args.start_epoch, args.epochs):
 		adjust_learning_rate(optimizer, epoch)
 
+		criterion.reset()
+
 		# train for one epoch
 		train(train_loader, model, criterion, optimizer, epoch)
 
 		# evaluate on validation set
 		loss = validate(val_loader, model, criterion)
 		
-		writer.add_scalar('/runs/cae/validationLoss' , loss.item(), epoch)
+		writer.add_histogram('/runs/cae/sparsity', model.code)
+		writer.add_scalar('/runs/cae/validationLoss', loss.item(), epoch)
 
 		# remember best prec@1 and save checkpoint
 		if(loss < best_loss):
@@ -169,7 +164,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 	model.train()
 
 	end = time.time()
-	for i, (input, target) in enumerate(train_loader):
+	for i, (input, target, ID) in enumerate(train_loader):
 
 		# measure data loading time
 		data_time.update(time.time() - end)
@@ -177,11 +172,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
 		target = target.cuda(async=True)
 		input_var = torch.autograd.Variable(input).cuda()
 		target_var = torch.autograd.Variable(target)
-
 		# compute output
 		output = model(input_var)
-		loss = criterion(output, model, target_var)
-
+		loss = criterion(output, torch.autograd.Variable(model.code.data), target_var, ID)
+		
 		# compute gradient and do SGD step
 		optimizer.zero_grad()
 		loss.backward()
@@ -216,30 +210,32 @@ def validate(val_loader, model, criterion):
 	model.eval()
 
 	end = time.time()
-	for i, (input, target) in enumerate(val_loader):
-		target = target.cuda(async=True)
-		input_var = torch.autograd.Variable(input, volatile=True).cuda()
-		target_var = torch.autograd.Variable(target, volatile=True)
+	with torch.no_grad():
+		for i, (input, target, ID) in enumerate(val_loader):
+			target = target.cuda(async=True)
+			input_var = torch.autograd.Variable(input).cuda()
+			target_var = torch.autograd.Variable(target)
 
-		# compute output
-		output = model(input_var)
-		loss = criterion(output, model, target_var)
+			# compute output
+			output = model(input_var)
+			loss = criterion(output, model.code, target_var, ID)
 
-		output = output.float()
-		loss = loss.float()
+			output = output.float()
+			loss = loss.float()
 
-		# measure accuracy and record loss
-		losses.update(loss.data[0], input.size(0))
+			# measure accuracy and record loss
+			losses.update(loss.data[0], input.size(0))
 
-		# measure elapsed time
-		batch_time.update(time.time() - end)
-		end = time.time()
 
-		if i % args.print_freq == 0:
-			print('Test: [{0}/{1}]\t'
-				  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-				  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-				  .format(i, len(val_loader), batch_time=batch_time, loss=losses))
+			# measure elapsed time
+			batch_time.update(time.time() - end)
+			end = time.time()
+
+			if i % args.print_freq == 0:
+				print('Test: [{0}/{1}]\t'
+					  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+					  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+				  	.format(i, len(val_loader), batch_time=batch_time, loss=losses))
 
 	return losses.avg
 

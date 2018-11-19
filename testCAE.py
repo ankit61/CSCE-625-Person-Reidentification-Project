@@ -45,20 +45,22 @@ def test(val_loader, model):
 			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
 			writer.add_image("cae/images/im_" + str(i), img, i)
 
+def main():
+	model_path = sys.argv[1]
+	checkpoint = torch.load(model_path)
+	model = CAE(img_size)
+	model.cuda()
+	model.load_state_dict(checkpoint['state_dict'])
+	
+	val_loader = torch.utils.data.DataLoader(
+			PReIDDataset(DatasetType.TRAIN, transform=transforms.Compose([
+				transforms.Resize(img_size),
+				transforms.ToTensor(),
+				transforms.Normalize(mean=mean, std=std),
+			])),
+			batch_size=1, shuffle=False,
+			num_workers=4, pin_memory=True)
 
-model_path = sys.argv[1]
-checkpoint = torch.load(model_path)
-model = CAE(img_size)
-model.cuda()
-model.load_state_dict(checkpoint['state_dict'])
+	test(val_loader, model)
 
-val_loader = torch.utils.data.DataLoader(
-		PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
-			transforms.Resize(img_size),
-			transforms.ToTensor(),
-			transforms.Normalize(mean=mean, std=std),
-		])),
-		batch_size=1, shuffle=False,
-		num_workers=4, pin_memory=True)
-
-test(val_loader, model)
+main()
