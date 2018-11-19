@@ -15,7 +15,9 @@ sys.path.insert(
 from pytorch_segmentation_detection.transforms import RandomCropJoint
 from tensorboardX import SummaryWriter
 from sklearn.metrics import confusion_matrix
+import PIL
 from PIL import Image
+import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import random
@@ -70,14 +72,18 @@ def get_valid_annotations_index(flatten_annotations, mask_out_value=255):
  #  def __init__(self, size):
    #    super().__init__()
 
+def transform_test_image(img):
+    test_size_func = ScaleDownOrPad((244, 244))
+    
+    img = torch.from_numpy(np.asarray(test_size_func(img))).float()
+    
+    img = transforms.Normalize(valid_mean, valid_stddev).__call__(img)
+
+    return img
 
 class LIPDataset(torch.utils.data.Dataset):
-    def __init__(
-        self,
-        transform_rule=None,
-        trainpath="/datasets/LIP/TrainVal_images/train_images/",
-        targetpath="/datasets/LIP/EDITED_TrainVal_parsing_annotations/train_segmentations/"
-    ):
+    def __init__(self, transform_rule=None, trainpath="/datasets/LIP/TrainVal_images/train_images/", targetpath="/datasets/LIP/EDITED_TrainVal_parsing_annotations/train_segmentations/"
+        ):
         self.trainpath = trainpath
         self.targetpath = targetpath
         self.imgfilenames = sorted(
@@ -106,6 +112,29 @@ class LIPDataset(torch.utils.data.Dataset):
         #print(f"filenames called {_img.size()}:{_target.size()}")
         return _img, _target
 
+class TestDataset(torch.utils.data.Dataset):
+    def __init__( self, inputpath, output_path):
+        self.inputpath = inputpath
+        self.output_path = output_path
+        self.imgfilenames = sorted(
+            [filename for _, _, filename in os.walk(inputpath)][0])
+
+    def __len__(self):
+        return len(self.imgfilenames)
+
+    def __getitem__(self, key):
+        
+        
+        _img = Image.open(
+            self.inputpath + self.imgfilenames[key])
+        
+        _img, _ = valid_transform([_img, _img])
+
+        # convert to tensor to be used by pytorch
+        
+        #_img = _img.permute(2, 1, 0)
+        #print(_img.shape)
+        return _img, self.imgfilenames[key]
 
 class ScaleDownOrPad(object):
 
@@ -193,11 +222,85 @@ valset_loader = torch.utils.data.DataLoader(valset, batch_size=1, sampler=val_su
 
 labels = range(number_of_classes)
 
+# Define the model and load it to the gpu
+fcn = resnet_dilated.Resnet18_8s(num_classes=2)
+fcn.load_state_dict(torch.load("./run2/best.pth"))
+fcn.cuda()
+fcn.train()
+
+# Uncomment to preserve BN statistics
+# fcn.eval()
+# for m in fcn.modules():
+
+#     if isinstance(m, nn.BatchNorm2d):
+#         m.weight.requires_grad = False
+#         m.bias.requires_grad = False
+
+# Define the loss and load it to gpu
+#optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
+
+criterion = nn.CrossEntropyLoss(torch.Tensor(
+    [1.0, 3.0]), size_average=False).cuda()
+
+
+optimizer = optim.Adam(fcn.parameters(), lr=0.0001, weight_decay=0.0001)
+
+
+def process_images(dataset_dir, processed_dir):
+    
+    
+    dataset = TestDataset(inputpath=dataset_dir, output_path=processed_dir)
+
+    images_to_process = torch.utils.data.DataLoader(dataset, batch_size=1, 
+                                            shuffle=False, num_workers=1)
+    fcn.eval()
+    num_of_images = len(images_to_process)
+    count = 0
+    for image, name in images_to_process:
+        gt_image = np.array(image.cpu()[0].type(torch.FloatTensor).numpy())
+        image = Variable(image.cuda())
+
+        #image = Variable(image)
+        logits = fcn(image)
+
+        # First we do argmax on gpu and then transfer it to cpu
+        logits = logits.data
+        _, prediction = logits.max(1)
+        prediction = prediction.squeeze(1)
+        
+        prediction_for_output = transforms.ToPILImage()(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor)).convert('L')
+        #prediction_for_output = prediction_for_output[:, :, 0:1].copy()
+        gt_image[0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
+        gt_image[1, :, :] = gt_image[1, :, :] * valid_stddev[1] + valid_mean[1]
+        gt_image[2, :, :] = gt_image[2, :, :] * valid_stddev[2] + valid_mean[2]
+
+        f = np.vectorize(lambda x: np.uint8(x*255))
+        gt_image = f(gt_image).copy()
+        gt_image = np.transpose(gt_image, (1,2,0))
+        gt_image = transforms.ToPILImage()(gt_image).convert('RGB')
+
+        #gt_image = gt_image[:, :, :].copy()
+        #prediction_for_output= np.transpose(prediction_for_output, (2, 0, 1) )
+
+        #print(gt_image.size)
+        #print(prediction_for_output.size)
+
+        #masked = cv2.bitwise_and(prediction_for_output, gt_image, mask=gt_image)
+        
+        comp = Image.new('RGB', (300, 300))
+        comp.paste(gt_image, mask=prediction_for_output)
+        comp.save(processed_dir + name[0])
+
+        #writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
+        #writer.add_image('DUKESegmented/Image' + str(count) + '/Original', gt_image, count)
+        #cv2.imwrite(processed_dir + name[0], np.transpose(masked, (1,2,0)))
+
+        count += 1
+
 # Define the validation function to track MIoU during the training
 
 
 def validate():
-
     fcn.eval()
 
     overall_confusion_matrix = None
@@ -275,95 +378,82 @@ def validate():
 
     return mean_intersection_over_union
 
+def start_training():
 
-# Define the model and load it to the gpu
-fcn = resnet_dilated.Resnet18_8s(num_classes=2)
-fcn.load_state_dict(torch.load("./resnet_18_8s_best_hsv29.pth"))
-fcn.cuda()
-fcn.train()
+    best_validation_score = 0
 
-# Uncomment to preserve BN statistics
-# fcn.eval()
-# for m in fcn.modules():
+    iter_size = 20
+    with open("logfile10.txt", "a+") as file:
+        for epoch in range(9, 200):  # loop over the dataset multiple times
 
-#     if isinstance(m, nn.BatchNorm2d):
-#         m.weight.requires_grad = False
-#         m.bias.requires_grad = False
+            print(f"Epoch {epoch}")
+            l_epoch = len(trainloader)
+            running_loss = 0.0
+            current_validation_score = validate()
+            for i, data in enumerate(trainloader, 0):
+                
+                # get the inputs
+                img, anno = data
 
-# Define the loss and load it to gpu
-#optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
+                # We need to flatten annotations and logits to apply index of valid
+                # annotations. All of this is because pytorch doesn't have tf.gather_nd()
+                anno_flatten = flatten_annotations(anno)
+                index = get_valid_annotations_index(
+                    anno_flatten, mask_out_value=255)
+                anno_flatten_valid = torch.index_select(anno_flatten, 0, index)
 
-criterion = nn.CrossEntropyLoss(torch.Tensor(
-    [1.0, 3.0]), size_average=False).cuda()
+                # wrap them in Variable
+                # the index can be acquired on the gpu
+                img, anno_flatten_valid, index = Variable(img.cuda()), Variable(
+                    anno_flatten_valid.cuda()), Variable(index.cuda())
+                #img, anno_flatten_valid, index = Variable(img, Variable(anno_flatten_valid), Variable(index))
 
+                # zero the parameter gradients
+                optimizer.zero_grad()
 
-optimizer = optim.Adam(fcn.parameters(), lr=0.0001, weight_decay=0.0001)
+                # forward + backward + optimize
+                logits = fcn(img)
+                logits_flatten = flatten_logits(logits, number_of_classes=2)
+                logits_flatten_valid = torch.index_select(logits_flatten, 0, index)
 
+                loss = criterion(logits_flatten_valid, anno_flatten_valid)
+                loss.backward()
+                optimizer.step()
 
-best_validation_score = 0
+                # print statistics
+                running_loss += (loss.data[0] / logits_flatten_valid.size(0))
+                if (i + 1) % 5 == 0:
 
-iter_size = 20
-with open("logfile10.txt", "a+") as file:
-    for epoch in range(9, 200):  # loop over the dataset multiple times
+                    print(f"epoch {epoch} : {i}/{l_epoch} -> {running_loss / 5}")
+                    file.write(
+                        f"epoch {epoch} : {i}/{l_epoch} -> {running_loss / 5}")
 
-        print(f"Epoch {epoch}")
-        l_epoch = len(trainloader)
-        running_loss = 0.0
-        current_validation_score = validate()
-        for i, data in enumerate(trainloader, 0):
-            
-            # get the inputs
-            img, anno = data
+                    avg_loss = running_loss / 5
+                    writer.add_scalar('segmentation/total_loss' +
+                                    str(epoch), avg_loss, i)
+                    running_loss = 0.0
 
-            # We need to flatten annotations and logits to apply index of valid
-            # annotations. All of this is because pytorch doesn't have tf.gather_nd()
-            anno_flatten = flatten_annotations(anno)
-            index = get_valid_annotations_index(
-                anno_flatten, mask_out_value=255)
-            anno_flatten_valid = torch.index_select(anno_flatten, 0, index)
+                    current_validation_score = validate()
 
-            # wrap them in Variable
-            # the index can be acquired on the gpu
-            img, anno_flatten_valid, index = Variable(img.cuda()), Variable(
-                anno_flatten_valid.cuda()), Variable(index.cuda())
-            #img, anno_flatten_valid, index = Variable(img, Variable(anno_flatten_valid), Variable(index))
+            print(f"TOTAL MIoU {current_validation_score}")
+            file.write(f"TOTAL MIoU {current_validation_score}")
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+            # Save the model if it has a better MIoU score.
+            if current_validation_score > best_validation_score:
 
-            # forward + backward + optimize
-            logits = fcn(img)
-            logits_flatten = flatten_logits(logits, number_of_classes=2)
-            logits_flatten_valid = torch.index_select(logits_flatten, 0, index)
-
-            loss = criterion(logits_flatten_valid, anno_flatten_valid)
-            loss.backward()
-            optimizer.step()
-
-            # print statistics
-            running_loss += (loss.data[0] / logits_flatten_valid.size(0))
-            if (i + 1) % 5 == 0:
-
-                print(f"epoch {epoch} : {i}/{l_epoch} -> {running_loss / 5}")
-                file.write(
-                    f"epoch {epoch} : {i}/{l_epoch} -> {running_loss / 5}")
-
-                avg_loss = running_loss / 5
-                writer.add_scalar('segmentation/total_loss' +
-                                  str(epoch), avg_loss, i)
-                running_loss = 0.0
-
-                current_validation_score = validate()
-
-        print(f"TOTAL MIoU {current_validation_score}")
-        file.write(f"TOTAL MIoU {current_validation_score}")
-
-        # Save the model if it has a better MIoU score.
-        if current_validation_score > best_validation_score:
-
-            torch.save(fcn.state_dict(),
-                       f'resnet_18_8s_best_hsv_IMAGES{epoch}.pth')
-            best_validation_score = current_validation_score
+                torch.save(fcn.state_dict(),
+                        f'resnet_18_8s_best_hsv_IMAGES{epoch}.pth')
+                best_validation_score = current_validation_score
 
 
-print('Finished Training')
+    print('Finished Training')
+
+
+
+# Process x Dataset
+
+
+
+# Train on LIP Dataset
+# start_training()
+process_images("/datasets/DukeMTMC-reID/bounding_box_train/train/", "/datasets/DukeSegmented/")
