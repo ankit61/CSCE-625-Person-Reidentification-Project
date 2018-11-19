@@ -43,7 +43,7 @@ def test(val_loader, model):
 			input_img[:, 1, :, :] = input_img[:, 1, :, :] * std[1] + mean[1]
 			input_img[:, 2, :, :] = input_img[:, 2, :, :] * std[2] + mean[2]
 			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
-			writer.add_image("cae/images/im_" + str(i), img, i)
+			writer.add_image("cae/im_" + str(i), img, i)
 
 def main():
 	model_path = sys.argv[1]
