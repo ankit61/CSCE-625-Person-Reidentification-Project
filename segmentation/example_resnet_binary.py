@@ -46,6 +46,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 # Tensorboard
 
 writer = SummaryWriter('/runs/images')
+SIZE_H = 300
+SIZE_W = 300
 
 
 def flatten_logits(logits, number_of_classes):
@@ -72,15 +74,16 @@ def get_valid_annotations_index(flatten_annotations, mask_out_value=255):
  #  def __init__(self, size):
    #    super().__init__()
 
+"""
 def transform_test_image(img):
-    test_size_func = ScaleDownOrPad((244, 244))
+    test_size_func = ScaleDownOrPad((SIZE_W, SIZE_H))
     
     img = torch.from_numpy(np.asarray(test_size_func(img))).float()
     
     img = transforms.Normalize(valid_mean, valid_stddev).__call__(img)
 
     return img
-
+"""
 class LIPDataset(torch.utils.data.Dataset):
     def __init__(self, transform_rule=None, trainpath="/datasets/LIP/TrainVal_images/train_images/", targetpath="/datasets/LIP/EDITED_TrainVal_parsing_annotations/train_segmentations/"
         ):
@@ -178,7 +181,7 @@ number_of_classes = 2
 # include <sys/types.h>
 # include <unistd.h>labels = range(number_of_classes)
 
-resize_func = ScaleDownOrPad((300, 300))
+resize_func = ScaleDownOrPad((SIZE_W, SIZE_H))
 
 train_transform = ComposeJoint(
     [
@@ -287,9 +290,24 @@ def process_images(dataset_dir, processed_dir):
 
         #masked = cv2.bitwise_and(prediction_for_output, gt_image, mask=gt_image)
         
-        comp = Image.new('RGB', (300, 300))
+        comp = Image.new('RGB', (SIZE_W, SIZE_H))
         comp.paste(gt_image, mask=prediction_for_output)
-        comp.save(processed_dir + name[0])
+        
+
+        #cropping image to save on batch size in CAE
+        # help from https://stackoverflow.com/questions/14211340/automatically-cropping-an-image-with-python-pil/42123638#42123638
+        comp_array = np.asarray(comp)
+        comp_bw = comp_array.max(axis=2)
+        non_empty_columns = np.where(comp_bw.max(axis=0)>0)[0]
+        non_empty_rows = np.where(comp_bw.max(axis=1)>0)[0]
+        cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
+
+        comp_reduced = comp_array[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
+
+        new_comp = Image.fromarray(comp_reduced)
+
+
+        new_comp.save(processed_dir + name[0])
 
         #writer.add_image('DUKESegmented/Image' + str(count) + '/Predicted', prediction_for_output, count)
         #writer.add_image('DUKESegmented/Image' + str(count) + '/Original', gt_image, count)
@@ -456,4 +474,4 @@ def start_training():
 
 # Train on LIP Dataset
 # start_training()
-process_images("/datasets/DukeMTMC-reID/bounding_box_train/train/", "/datasets/DukeSegmented/")
+process_images("/datasets/DukeMTMC-reID/bounding_box_test/", "/datasets/DukeSegmented/test/")
