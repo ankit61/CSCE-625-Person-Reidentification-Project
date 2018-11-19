@@ -4,3 +4,5 @@ resnet*
 *.png
 *.jpg
 venv/
+*.pth
+
