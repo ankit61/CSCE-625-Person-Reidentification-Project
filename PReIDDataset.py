@@ -14,9 +14,9 @@ class PReIDDataset(torch.utils.data.Dataset):
 		self, 
 		load,
 		transform=None, 
-		trainPath = "/datasets/DukeMTMC-reID/bounding_box_train/train",
-		valPath = "/datasets/DukeMTMC-reID/bounding_box_train/val",
-		testPath = "/datasets/DukeMTMC-reID/bounding_box_test/"
+		trainPath = "/datasets/DukeSegmented/train",
+		valPath = "/datasets/DukeSegmented/val",
+		testPath = "/datasets/DukeSegmented/test/"
 	):
 		if(load == DatasetType.TRAIN):
 			self.imgfilenames = sorted([filename for _, _, filename in os.walk(trainPath)][0])
@@ -36,11 +36,12 @@ class PReIDDataset(torch.utils.data.Dataset):
 	def __getitem__(self, key):
 
 		img = Image.open(os.path.join(self.path, self.imgfilenames[key])).convert('RGB')
+		personID = int(self.imgfilenames[key][0:4])
 
 		if self.transform is not None:
 			img = self.transform(img)
 		
 		#print(_img.size())
 
-		return (img, img) #target is also the image
+		return (img, img, personID) #target is also the image
 

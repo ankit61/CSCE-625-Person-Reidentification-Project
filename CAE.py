@@ -1,6 +1,7 @@
 import torch
 import torchvision.models as models
 import resnetDecoder
+import clusteringLayer
 
 class CAE(torch.nn.Module):
 
@@ -10,7 +11,9 @@ class CAE(torch.nn.Module):
 		resnet.maxpool = torch.nn.Sequential()
 		self.encoder = torch.nn.Sequential(*list(resnet.children())[:-2])
 		self.decoder = resnetDecoder.resnetDecoder18(out_size=img_size)
+		self.clustering = clusteringLayer.clusteringLayer(inplanes=512)
 
 	def forward(self, x):
 		self.code = self.encoder(x)
+		self.embedding = self.clustering(self.code) 
 		return self.decoder(self.code);

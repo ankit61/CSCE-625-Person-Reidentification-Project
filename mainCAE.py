@@ -17,7 +17,7 @@ from CAE import CAE
 from MaxSqError import MaxSqError
 from tensorboardX import SummaryWriter
 
-writer = SummaryWriter("/runs/")
+writer = SummaryWriter("/runs")
 
 torch.set_default_tensor_type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
 
@@ -35,7 +35,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 					help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=64, type=int,
 					metavar='N', help='mini-batch size (default: 64)')
-parser.add_argument('--lr', '--learning-rate', default=0.001, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.000001, type=float,
 					metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 					help='momentum')
@@ -137,8 +137,8 @@ def main():
 		# evaluate on validation set
 		loss = validate(val_loader, model, criterion)
 		
-		writer.add_histogram('/runs/cae/sparsity', model.code)
-		writer.add_scalar('/runs/cae/validationLoss', loss.item(), epoch)
+		writer.add_histogram('cae/sparsity', model.code)
+		writer.add_scalar('cae/validationLoss', loss.item(), epoch)
 
 		# remember best prec@1 and save checkpoint
 		if(loss < best_loss):
@@ -174,7 +174,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 		target_var = torch.autograd.Variable(target)
 		# compute output
 		output = model(input_var)
-		loss = criterion(output, torch.autograd.Variable(model.code.data), target_var, ID)
+		loss = criterion(output, torch.autograd.Variable(model.code.data), torch.autograd.Variable(model.embedding.data), target_var, ID)
 		
 		# compute gradient and do SGD step
 		optimizer.zero_grad()
@@ -197,7 +197,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 				  'Loss {loss.val:.4f} ({loss.avg:.4f})'.format(
 					  epoch, i, len(train_loader), batch_time=batch_time,
 					  data_time=data_time, loss=losses))
-			writer.add_scalar('/runs/cae/all' , loss.item(), epoch * len(train_loader) + i)
+			writer.add_scalar('cae/all' , loss.item(), epoch * len(train_loader) + i)
 
 def validate(val_loader, model, criterion):
 	"""
@@ -218,7 +218,7 @@ def validate(val_loader, model, criterion):
 
 			# compute output
 			output = model(input_var)
-			loss = criterion(output, model.code, target_var, ID)
+			loss = criterion(output, model.code, model.embedding, target_var, ID)
 
 			output = output.float()
 			loss = loss.float()
