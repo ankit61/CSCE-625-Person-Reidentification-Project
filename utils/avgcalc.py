@@ -15,7 +15,7 @@ size = [0,0];
 
 length = len(image_names)
 
-for n in range(0, length)
+for n in range(0, length):
 	im = cv2.imread(os.path.join(path + image_names[n]))
 	if(im is None):
 		raise Exception("incorrect path: " + os.path.join(path + image_names[n]))
