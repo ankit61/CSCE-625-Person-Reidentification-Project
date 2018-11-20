@@ -170,72 +170,9 @@ class SegmentationNetwork(resnet_dilated.Resnet18_8s):
 # Define the loss and load it to gpu
 #optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
 
-<<<<<<< HEAD
-    
-def process_images(dataset_dir, processed_dir):
-
-    dataset = TestDataset(inputpath=dataset_dir, output_path=processed_dir)
-    images_to_process = torch.utils.data.DataLoader(
-        dataset, 
-        batch_size=1, 
-        shuffle=False, 
-        num_workers=1
-    )
-
-    fcn.eval()
-    num_of_images = len(images_to_process)
-    count = 0
-    for image, name in images_to_process:
-        gt_image = np.array(image.cpu()[0].type(torch.FloatTensor).numpy())
-        image = Variable(image.cuda())
-
-        #image = Variable(image)
-        logits = fcn(image)
-
-        # First we do argmax on gpu and then transfer it to cpu
-        logits = logits.data
-        _, prediction = logits.max(1)
-        prediction = prediction.squeeze(1)
-        
-        prediction_for_output = transforms.ToPILImage()(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor)).convert('L')
-        #prediction_for_output = prediction_for_output[:, :, 0:1].copy()
-        gt_image[0, :, :] = gt_image[0, :, :] * valid_stddev[0] + valid_mean[0]
-        gt_image[1, :, :] = gt_image[1, :, :] * valid_stddev[1] + valid_mean[1]
-        gt_image[2, :, :] = gt_image[2, :, :] * valid_stddev[2] + valid_mean[2]
-
-        f = np.vectorize(lambda x: np.uint8(x*255))
-        gt_image = f(gt_image).copy()
-        gt_image = np.transpose(gt_image, (1,2,0))
-        gt_image = transforms.ToPILImage()(gt_image).convert('RGB')
-
-        #gt_image = gt_image[:, :, :].copy()
-        #prediction_for_output= np.transpose(prediction_for_output, (2, 0, 1) )
-
-        #print(gt_image.size)
-        #print(prediction_for_output.size)
-
-        #masked = cv2.bitwise_and(prediction_for_output, gt_image, mask=gt_image)
-        
-        comp = Image.new('RGB', (SIZE_W, SIZE_H))
-        comp.paste(gt_image, mask=prediction_for_output)
-        
-
-        #cropping image to save on batch size in CAE
-        # help from https://stackoverflow.com/questions/14211340/automatically-cropping-an-image-with-python-pil/42123638#42123638
-        comp_array = np.asarray(comp)
-        comp_bw = comp_array.max(axis=2)
-        non_empty_columns = np.where(comp_bw.max(axis=0)>0)[0]
-        non_empty_rows = np.where(comp_bw.max(axis=1)>0)[0]
-        cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
-
-        comp_reduced = comp_array[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
-
-        new_comp = Image.fromarray(comp_reduced)
-=======
 #defining global training and valdation 'class functions'
 
 resize_func = ScaleDownOrPad((SIZE_W, SIZE_H))
->>>>>>> c0aee9eecabee930391310d3d002507d7b3ae724
 
 train_transform = ComposeJoint(
     [
@@ -262,12 +199,16 @@ valid_transform = ComposeJoint(
 )
 
 
-def process_images(dataset_dir, processed_dir):
+def process_images(dataset_dir, processed_dir, batchsize):
     with SegmentationNetwork() as fcn:
+        if(batchsize == 1):
+            print('Segmenting Query image...')
+        else:
+            print('Segmenting Gallery images...')
         dataset = TestDataset(inputpath=dataset_dir, output_path=processed_dir)
         images_to_process = torch.utils.data.DataLoader(
             dataset, 
-            batch_size=1, 
+            batch_size=batchsize, 
             shuffle=False, 
             num_workers=1
         )
