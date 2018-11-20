@@ -15,6 +15,7 @@ from PReIDDataset import PReIDDataset
 from PReIDDataset import DatasetType
 from CAE import CAE
 from MaxSqError import MaxSqError
+from MaxSqError import LossType
 from tensorboardX import SummaryWriter
 
 writer = SummaryWriter("/runs")
@@ -67,7 +68,7 @@ def main():
 	if not os.path.exists(args.save_dir):
 		os.makedirs(args.save_dir)
 
-	model = CAE(input_size)
+	model = CAE(input_size, should_decode = False, freeze_encoder = True)
 
 	# model.features = torch.nn.DataParallel(model.features)
 	model.cuda()
@@ -118,7 +119,7 @@ def main():
 		num_workers=args.workers, pin_memory=True)
 
 	# define loss function (criterion) and pptimizer
-	criterion = MaxSqError(args.reg_const)
+	criterion = MaxSqError(args.reg_const, lossType=LossType.CLUSTERING)
 
 	optimizer = torch.optim.Adam(model.parameters(), args.lr)
 
