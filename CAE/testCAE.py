@@ -62,5 +62,3 @@ def main():
 			num_workers=4, pin_memory=True)
 
 	test(val_loader, model)
-
-main()
