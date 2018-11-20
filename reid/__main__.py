@@ -1,13 +1,14 @@
-import segmentation.example_resnet_binary
-
-
+# import segmentation.example_resnet_binary
+from termcolor import colored
+import sys
+import os
 '''
 	1) Take 2 inputs (sys.argv): path to one image file (query) and one directory (storing gallery of images)
 	2) Run the segmentation network on the entire gallery, store the results in a new directory
 		note: before running the segmentation network on the gallery, check if the new directory already exists.  Make a naming convention
 	3) Run the segmentation network on the query image.  Store it only in memory.
 
-	To do steps 2) and 3), you would need a function that runs the segmentation network and takes 	 the batch size as input.
+	To do steps 2) and 3), you would need a function that runs the segmentation network and takes the batch size as input.
 
 	4) Now, run the autoencoder (look at testCAE.py) on the entire gallery and store the embeddings (obtained from model.embedding) for all images in memory (preferable) or on disk (if memory is not enough).
 	5) Run the autoencoder (without decoder) on the query image and store the embedding in memory
@@ -38,8 +39,38 @@ import segmentation.example_resnet_binary
 '''
 
 def main():
-	
 	pass
 
+def display_usage():
+	print(colored('Usage:\n', 'red', attrs=['bold', 'underline']) + 
+		colored('python3 reid /path/to/queryimage.jpg /directory/of/gallery/images /directory/to/output/to' , 'red'))
+
+
+# args:
+# query image filename, gallery images directory, output directory
 if __name__ == '__main__':
-    main()
+	PROPER_NUM_ARGS = 4
+	args = sys.argv
+	if(len(args) != PROPER_NUM_ARGS):
+		display_usage()
+		sys.exit(0)
+	
+	
+	query_path = sys.argv[1]
+	gallery_image_dir = sys.argv[2]
+	output_dir = sys.argv[3]
+	if(not os.path.isfile(query_path)):
+		print(colored('Could not locate Query Image. Please see usage' , 'red'))
+		display_usage()
+		sys.exit(0)
+	if(not os.path.isdir(gallery_image_dir)):
+		print(colored('Could not locate gallery directory. Please see usage' , 'red'))
+		display_usage()
+		sys.exit(0)
+	if not os.path.exists(output_dir):
+		os.makedirs(output_dir)
+		
+	print(gallery_image_dir)
+	print()
+	print(colored('-- ABR-Net --', 'blue', attrs=['bold']))
+	main()
