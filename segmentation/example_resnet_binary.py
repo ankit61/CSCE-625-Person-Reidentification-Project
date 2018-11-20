@@ -348,7 +348,6 @@ def validate():
         # ----------------- Tensor Board Image Output --------------------------
         # Move the prediction to the cpu, convert it to a tensor, and then to a PIL image
         prediction_for_output = np.array(prediction.cpu().permute(0, 2, 1).type(torch.FloatTensor).numpy())
-
         
         # 
         
@@ -465,7 +464,6 @@ def start_training():
 
 
     print('Finished Training')
-
 
 
 # Process x Dataset

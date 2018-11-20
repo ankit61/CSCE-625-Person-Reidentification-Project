@@ -1,3 +1,8 @@
+import segmentation.example_resnet_binary
+
+
+
+
 '''
 	1) Take 2 inputs (sys.argv): path to one image file (query) and one directory (storing gallery of images)
 	2) Run the segmentation network on the entire gallery, store the results in a new directory
