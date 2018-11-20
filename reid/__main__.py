@@ -1,8 +1,6 @@
 import segmentation.example_resnet_binary
 
 
-
-
 '''
 	1) Take 2 inputs (sys.argv): path to one image file (query) and one directory (storing gallery of images)
 	2) Run the segmentation network on the entire gallery, store the results in a new directory
@@ -38,3 +36,10 @@ import segmentation.example_resnet_binary
 	   Note that you'll have to also ask the user to get the weights file to both the segmenation
 	   and CAE network
 '''
+
+def main():
+	
+	pass
+
+if __name__ == '__main__':
+    main()
