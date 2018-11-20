@@ -2,6 +2,10 @@
 from termcolor import colored
 import sys
 import os
+
+from segmentation.network import SegmentaionNetwork
+
+
 '''
 	1) Take 2 inputs (sys.argv): path to one image file (query) and one directory (storing gallery of images)
 	2) Run the segmentation network on the entire gallery, store the results in a new directory
@@ -56,6 +60,7 @@ if __name__ == '__main__':
 		sys.exit(0)
 	
 	
+
 	query_path = sys.argv[1]
 	gallery_image_dir = sys.argv[2]
 	output_dir = sys.argv[3]
@@ -70,6 +75,14 @@ if __name__ == '__main__':
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)
 		
+	# SEGMENTATION NETWORK
+	segnet = SegmentaionNetwork 
+	
+	# segnet.process_image(query_path, batchsize=1, output_dir)
+	# segnet.process_images(gallery_image_dir, batchsize=1, output_dir)
+	
+
+
 	print(gallery_image_dir)
 	print()
 	print(colored('-- ABR-Net --', 'blue', attrs=['bold']))

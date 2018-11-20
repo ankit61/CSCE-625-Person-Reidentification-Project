@@ -202,7 +202,7 @@ class SegmentaionNetwork():
 # Define the loss and load it to gpu
 #optimizer = optim.Adam(filter(lambda p: p.requires_grad, fcn.parameters()), lr=0.00001, weight_decay=0.0005)
 
-
+    
 def process_images(dataset_dir, processed_dir):
 
     dataset = TestDataset(inputpath=dataset_dir, output_path=processed_dir)
