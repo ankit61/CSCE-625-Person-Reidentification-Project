@@ -21,9 +21,9 @@ writer = SummaryWriter("/runs")
 
 torch.set_default_tensor_type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
 
-input_size = (218, 85)
-mean = [0.43993556, 0.43089762, 0.44579148]
-std = [0.19977007, 0.20279744, 0.19051233]
+input_size = (208, 76)
+mean = [0.216, 0.2074816, 0.22934238]
+std = [0.2333638, 0.22653223, 0.23671082]
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg19_bn')
@@ -35,7 +35,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 					help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=64, type=int,
 					metavar='N', help='mini-batch size (default: 64)')
-parser.add_argument('--lr', '--learning-rate', default=0.000001, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.00001, type=float,
 					metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 					help='momentum')
@@ -225,7 +225,6 @@ def validate(val_loader, model, criterion):
 
 			# measure accuracy and record loss
 			losses.update(loss.data[0], input.size(0))
-
 
 			# measure elapsed time
 			batch_time.update(time.time() - end)

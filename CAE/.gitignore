@@ -1,0 +1,9 @@
+logfile*
+resnet.py
+./__pycache__
+./trained_resnets
+*.png
+*.jpg
+venv/
+*.pth
+*.txt

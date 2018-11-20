@@ -13,9 +13,9 @@ import numpy as np
 
 writer = SummaryWriter("/runs/")
 
-img_size = [128,48]
-mean = [0.43000786, 0.42752744, 0.44254043]
-std = [0.24018411, 0.24295865, 0.24844268]
+input_size = (208, 76)
+mean = [0.216, 0.2074816, 0.22934238]
+std = [0.2333638, 0.22653223, 0.23671082]
 
 def test(val_loader, model):
 	"""
@@ -25,7 +25,7 @@ def test(val_loader, model):
 	model.eval()
 	with torch.no_grad():
 		toPIL = transforms.ToPILImage()
-		for i, (input_img, target) in enumerate(val_loader):
+		for i, (input_img, target, ID) in enumerate(val_loader):
 			target = target.cuda(async=True)
 			input_var = torch.autograd.Variable(input_img, volatile=True).cuda()
 			target_var = torch.autograd.Variable(target, volatile=True)
@@ -53,7 +53,7 @@ def main():
 	model.load_state_dict(checkpoint['state_dict'])
 	
 	val_loader = torch.utils.data.DataLoader(
-			PReIDDataset(DatasetType.TRAIN, transform=transforms.Compose([
+			PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
 				transforms.Resize(img_size),
 				transforms.ToTensor(),
 				transforms.Normalize(mean=mean, std=std),

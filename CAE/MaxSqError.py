@@ -16,12 +16,12 @@ class MaxSqError:
 	
 	def __call__(self, pred, code, embedding, target, ID):
 		if(pred.size() == target.size() and pred.dim() == 4):
-			reconstructionLoss = F.l1_loss(pred, target)#, reduction='sum')
+			reconstructionLoss = (pred - target).pow(2).view(pred.size(0), pred.size(1), -1).max(2)[0].mean(0).sum()
 			#regularizationLoss = self.regConst * torch.mean(torch.abs(code))#.mean(0).sum()
 			
 			#compute clustering loss
 			clusteringLoss = torch.zeros(1, requires_grad=True)
-			for i in range(pred.size(0)):
+			'''for i in range(pred.size(0)):
 				curID = int(ID[i])
 				if(curID in self.ID2sum):
 					if(self.batch % 130 == 0):
@@ -36,7 +36,7 @@ class MaxSqError:
 					self.ID2sum[curID] += embedding[i]
 				else:
 					self.ID2count[curID] = 1
-					self.ID2sum[curID] = embedding[i]
+					self.ID2sum[curID] = embedding[i]'''
 
 			loss = clusteringLoss + reconstructionLoss #+ regularizationLoss
 			

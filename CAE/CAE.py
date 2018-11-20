@@ -15,5 +15,6 @@ class CAE(torch.nn.Module):
 
 	def forward(self, x):
 		self.code = self.encoder(x)
-		self.embedding = self.clustering(self.code) 
+		#self.embedding = self.clustering(self.code) 
+		self.embedding = self.code
 		return self.decoder(self.code);
