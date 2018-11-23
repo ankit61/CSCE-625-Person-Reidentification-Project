@@ -1,2 +1,2 @@
-python3 reid test_query/testimg.png /datasets/DukeSegmented/test results/
+python3 reid test_query/ /datasets/DukeMTMC-reID/bounding_box_test/ results/
 
