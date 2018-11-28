@@ -44,22 +44,17 @@ def test(val_loader, model):
 			input_img[:, 2, :, :] = input_img[:, 2, :, :] * std[2] + mean[2]
 			input_img = input_img.cpu()
 			
-			pilImg = F.to_pil_image(output)
-			pilImg.save('segmented','.png')
-			break;
-			
 			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
-			writer.add_image("cae/im_" + str(i), img, i)
+			#writer.add_image("cae/im_" + str(i), img, i)
 
-def main():
-	model_path = sys.argv[1]
+def start_testing(model_path, img_size, valPath = "/datasets/DukeSegmented/val"):
 	checkpoint = torch.load(model_path)
 	model = CAE(img_size, should_decode=True)
 	model.cuda()
-	model.load_state_dict(checkpoint['state_dict'])
+	model.load(checkpoint['state_dict'])
 	
 	val_loader = torch.utils.data.DataLoader(
-			PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
+			PReIDDataset(DatasetType.VAL, valPath=valPath, transform=transforms.Compose([
 				transforms.Resize(img_size),
 				transforms.ToTensor(),
 				transforms.Normalize(mean=mean, std=std),
@@ -69,4 +64,5 @@ def main():
 
 	test(val_loader, model)
 
-main()
+if __name__ == "__main__":
+	start_testing(sys.argv[1], img_size)
