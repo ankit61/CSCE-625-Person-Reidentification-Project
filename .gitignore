@@ -1,4 +1,8 @@
 __pycache__/
 runs/
 test_query/
+<<<<<<< HEAD
 .vscode
+=======
+results/
+>>>>>>> c5a5fbb36974260f803ebf5c3e18c5d9499d97a6

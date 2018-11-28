@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from network import start_training #, process_images
-def main():
+
+def train():
     #process_images("/datasets/DukeMTMC-reID/bounding_box_test/", "/datasets/DukeSegmented/test/")
     start_training(
         "/datasets/LIP/TrainVal_images/train_images/",
@@ -11,4 +12,5 @@ def main():
     )
 
 if __name__=="__main__":
-    main()
+    train()
+
