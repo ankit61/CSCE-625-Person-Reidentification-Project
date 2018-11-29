@@ -65,6 +65,9 @@ if __name__ == '__main__':
     query_path = sys.argv[1]
     gallery_image_dir = sys.argv[2]
     output_dir = sys.argv[3]
+    output_dir_query = os.path.join(output_dir, 'segmented_query/')
+    output_dir_gallery = os.path.join(output_dir, 'segmented_gallery/')
+
     multiple_queries = False
     
     if(os.path.isdir(query_path)):
@@ -79,15 +82,27 @@ if __name__ == '__main__':
         print(colored('Could not locate gallery directory. Please see usage' , 'red'))
         display_usage()
         sys.exit(0)
+    
+    
+    
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-        
+    if not os.path.exists(output_dir_query):
+        os.makedirs(output_dir_query)
+    if not os.path.exists(output_dir_gallery):
+        os.makedirs(output_dir_gallery)
+   
                 
     # SEGMENTATION NETWORK
     
-    segnet.process_images(query_path, output_dir,  batchsize=1)
-    segnet.process_images(gallery_image_dir, output_dir, batchsize=1)
+    segnet.process_images(query_path, output_dir_query,  batchsize=1)
+    
+    print('Segmented Query Image and outputted to: ' + str(os.path.join(output_dir, '/segmented_query/')))
+    segnet.process_images(gallery_image_dir, output_dir_gallery , batchsize=1)
 
+
+    # CAE
+    
 
 
     print(gallery_image_dir)

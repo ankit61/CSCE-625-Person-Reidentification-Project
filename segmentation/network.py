@@ -205,6 +205,7 @@ def process_images(dataset_dir, processed_dir, batchsize):
             print('Segmenting Query image...')
         else:
             print('Segmenting Gallery images...')
+        print('Dataset dir:' + str(dataset_dir)) 
         dataset = TestDataset(inputpath=dataset_dir, output_path=processed_dir)
         images_to_process = torch.utils.data.DataLoader(
             dataset, 
@@ -212,7 +213,7 @@ def process_images(dataset_dir, processed_dir, batchsize):
             shuffle=False, 
             num_workers=1
         )
-
+        
         fcn.eval()
         num_of_images = len(images_to_process)
         count = 0
