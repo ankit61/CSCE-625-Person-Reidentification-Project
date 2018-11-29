@@ -4,30 +4,14 @@ import os
 from enum import Enum
 from PIL import Image
 
-class DatasetType(Enum):
-	TRAIN = 1
-	VAL = 2
-	TEST = 3
-
 class PReIDDataset(torch.utils.data.Dataset):
 	def __init__(
 		self, 
-		load,
+		path,
 		transform=None, 
-		trainPath = "/datasets/DukeSegmented/train",
-		valPath = "/datasets/DukeSegmented/val",
-		testPath = "/datasets/DukeSegmented/test/"
 	):
-		if(load == DatasetType.TRAIN):
-			self.imgfilenames = sorted([filename for _, _, filename in os.walk(trainPath)][0])
-			self.path = trainPath
-		elif(load == DatasetType.VAL):
-			self.imgfilenames = sorted([filename for _, _, filename in os.walk(valPath)][0])
-			self.path = valPath
-		else:
-			self.imgfilenames = sorted([filename for _, _, filename in os.walk(testPath)][0])
-			self.path = testPath
-		
+		self.imgfilenames = sorted([filename for _, _, filename in os.walk(path)][0])
+		self.path = path
 		self.transform = transform
 	
 	def __len__(self):
@@ -43,5 +27,8 @@ class PReIDDataset(torch.utils.data.Dataset):
 		
 		#print(_img.size())
 
-		return (img, img, personID) #target is also the image
+		return (img, img, personID, self.imgfilenames[key]) #target is also the image
+
+	def getFileName(self, i):
+		return self.imgfilenames[i]
 

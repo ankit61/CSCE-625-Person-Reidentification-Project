@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import torch
 from tensorboardX import SummaryWriter
 from PReIDDataset import PReIDDataset
-from PReIDDataset import DatasetType
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 import torchvision.utils as utils
@@ -54,7 +53,7 @@ def start_testing(model_path, img_size, valPath = "/datasets/DukeSegmented/val")
 	model.load(checkpoint['state_dict'])
 	
 	val_loader = torch.utils.data.DataLoader(
-			PReIDDataset(DatasetType.VAL, valPath=valPath, transform=transforms.Compose([
+			PReIDDataset(path=valPath, transform=transforms.Compose([
 				transforms.Resize(img_size),
 				transforms.ToTensor(),
 				transforms.Normalize(mean=mean, std=std),
