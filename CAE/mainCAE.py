@@ -12,7 +12,6 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
 from PReIDDataset import PReIDDataset
-from PReIDDataset import DatasetType
 from CAE import CAE
 from MaxSqError import MaxSqError
 from MaxSqError import LossType
@@ -36,7 +35,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 					help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=64, type=int,
 					metavar='N', help='mini-batch size (default: 64)')
-parser.add_argument('--lr', '--learning-rate', default=0.00001, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
 					metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 					help='momentum')
@@ -58,7 +57,7 @@ parser.add_argument('--reg-const', dest='reg_const',
 					help='regularization const encouraging sparsity',
 					type=int, default=1)
 
-best_loss = 200
+best_loss = 2500
 
 def main():
 	global args, best_loss
@@ -80,7 +79,7 @@ def main():
 			checkpoint = torch.load(args.resume)
 			args.start_epoch = checkpoint['epoch']
 			best_loss = checkpoint['loss']
-			model.load_state_dict(checkpoint['state_dict'])
+			model.load(checkpoint['state_dict'])
 			print("=> loaded checkpoint '{}' (epoch {})"
 				  .format(args.evaluate, checkpoint['epoch']))
 		else:
@@ -91,7 +90,7 @@ def main():
 	normalize = transforms.Normalize(mean=mean, std=std)
 
 	train_loader = torch.utils.data.DataLoader(
-		PReIDDataset(DatasetType.TRAIN, transform=transforms.Compose([
+		PReIDDataset("/datasets/DukeSegmented/train/", transform=transforms.Compose([
 			transforms.RandomHorizontalFlip(),
 			 transforms.Resize(input_size),
 			transforms.ToTensor(),
@@ -101,7 +100,7 @@ def main():
 		num_workers=args.workers, pin_memory=True)
 
 	val_loader = torch.utils.data.DataLoader(
-		PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
+		PReIDDataset("/datasets/DukeSegmented/val/", transform=transforms.Compose([
 			 transforms.Resize(input_size),
 			transforms.ToTensor(),
 			normalize,
@@ -110,7 +109,7 @@ def main():
 		num_workers=args.workers, pin_memory=True)
 
 	test_loader = torch.utils.data.DataLoader(
-		PReIDDataset(DatasetType.TEST, transform=transforms.Compose([
+		PReIDDataset("/datasets/DukeSegmented/test/", transform=transforms.Compose([
 			 transforms.Resize(input_size),
 			transforms.ToTensor(),
 			normalize,
@@ -165,7 +164,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 	model.train()
 
 	end = time.time()
-	for i, (input, target, ID) in enumerate(train_loader):
+	for i, (input, target, ID, filename) in enumerate(train_loader):
 
 		# measure data loading time
 		data_time.update(time.time() - end)
@@ -212,7 +211,7 @@ def validate(val_loader, model, criterion):
 
 	end = time.time()
 	with torch.no_grad():
-		for i, (input, target, ID) in enumerate(val_loader):
+		for i, (input, target, ID, filename) in enumerate(val_loader):
 			target = target.cuda(async=True)
 			input_var = torch.autograd.Variable(input).cuda()
 			target_var = torch.autograd.Variable(target)
@@ -230,6 +229,8 @@ def validate(val_loader, model, criterion):
 			# measure elapsed time
 			batch_time.update(time.time() - end)
 			end = time.time()
+
+#			writer.add_embedding(model.embedding.view(model.embedding.size(0), -1).cpu())#, label_img=input.cpu())
 
 			if i % args.print_freq == 0:
 				print('Test: [{0}/{1}]\t'

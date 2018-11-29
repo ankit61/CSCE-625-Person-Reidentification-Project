@@ -1,4 +1,5 @@
 __pycache__/
+*.swp
 runs/
 test_query/
 <<<<<<< HEAD

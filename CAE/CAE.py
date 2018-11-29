@@ -18,12 +18,18 @@ class CAE(torch.nn.Module):
 		
 		if(should_decode):
 			self.decoder = resnetDecoder.resnetDecoder18(out_size=img_size)
-#			self.clustering = torch.nn.Sequential()
+			self.clustering = torch.nn.Sequential()
 		else:
 			self.decoder = torch.nn.Sequential()
-		self.clustering = clusteringLayer.clusteringLayer(inplanes=512)
+			self.clustering = clusteringLayer.clusteringLayer(inplanes=512)
 
 	def forward(self, x):
 		self.code = self.encoder(x)
 		self.embedding = self.clustering(self.code) 
 		return self.decoder(self.code);
+
+	def load(self, state_dict):
+		model_state_dict = self.state_dict()
+		sub_dict = {k : v for k, v in state_dict.items() if k in model_state_dict and v.size() == model_state_dict[k].size() }
+		model_state_dict.update(sub_dict)
+		self.load_state_dict(model_state_dict)

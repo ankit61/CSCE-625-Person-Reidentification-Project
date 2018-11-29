@@ -1,0 +1,32 @@
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(scratch.py:24390): Gdk-CRITICAL **: 16:17:12.028: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+
+(scratch.py:24390): Gdk-CRITICAL **: 16:17:12.029: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Segmenting Query image...
+Dataset dir:/datasets/Market-1501/Market-1501-v15.09.15/bounding_box_test/
+/home/bentong/.local/lib/python3.6/site-packages/sklearn/externals/joblib/externals/cloudpickle/cloudpickle.py:47: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
+  import imp
+/usr/local/lib/python3.6/dist-packages/torch/nn/functional.py:1890: UserWarning: nn.functional.upsample is deprecated. Use nn.functional.interpolate instead.
+  warnings.warn("nn.functional.upsample is deprecated. Use nn.functional.interpolate instead.")
+Traceback (most recent call last):
+  File "scratch.py", line 2, in <module>
+    seg.process_images("/datasets/Market-1501/Market-1501-v15.09.15/bounding_box_test/","/datasets/Market-1501Segmented/test/",1)
+  File "/home/bentong/csce-625-person-re-identification/segmentation/network.py", line 219, in process_images
+    for image, name in images_to_process:
+  File "/usr/local/lib/python3.6/dist-packages/torch/utils/data/dataloader.py", line 336, in __next__
+    return self._process_next_batch(batch)
+  File "/usr/local/lib/python3.6/dist-packages/torch/utils/data/dataloader.py", line 357, in _process_next_batch
+    raise batch.exc_type(batch.exc_msg)
+OSError: Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/torch/utils/data/dataloader.py", line 106, in _worker_loop
+    samples = collate_fn([dataset[i] for i in batch_indices])
+  File "/usr/local/lib/python3.6/dist-packages/torch/utils/data/dataloader.py", line 106, in <listcomp>
+    samples = collate_fn([dataset[i] for i in batch_indices])
+  File "/home/bentong/csce-625-person-re-identification/segmentation/network.py", line 103, in __getitem__
+    self.inputpath + self.imgfilenames[key])
+  File "/usr/lib/python3/dist-packages/PIL/Image.py", line 2590, in open
+    % (filename if filename else fp))
+OSError: cannot identify image file '/datasets/Market-1501/Market-1501-v15.09.15/bounding_box_test/Thumbs.db'
+

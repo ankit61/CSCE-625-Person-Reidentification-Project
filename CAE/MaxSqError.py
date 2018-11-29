@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from tensorboardX import SummaryWriter
 from enum import Enum
+from statistics import mean
 
 writer = SummaryWriter("/runs")
 
@@ -27,7 +28,8 @@ class MaxSqError:
 		
 		if(pred.dim() == 4 and (pred.size() == target.size() or self.lossType == LossType.CLUSTERING)):
 			if(self.lossType == LossType.RECONSTRUCTION or self.lossType == LossType.BOTH):
-				reconstructionLoss = (pred - target).pow(2).view(pred.size(0), pred.size(1), -1).max(2)[0].mean(0).sum()
+				reconstructionLoss = 255 * F.l1_loss(pred, target)
+				# (255*(pred - target)).pow(2).view(pred.size(0), pred.size(1), -1).max(2)[0].mean(0).sum()
 			else:
 				reconstructionLoss = torch.zeros(1)
 
@@ -48,14 +50,25 @@ class MaxSqError:
 							mean = self.prevMean[curID]
 						else:
 							mean = self.ID2sum[curID] / self.ID2count[curID]
+							self.prevMean[curID] = mean
 						
-						clusteringLoss = clusteringLoss + F.mse_loss(embedding[i], mean) 
 						self.ID2count[curID] += 1
 						self.ID2sum[curID] += embedding[i]
 					else:
 						self.ID2count[curID] = 1
-						self.ID2sum[curID] = embedding[i]
+						self.prevMean[curID] = mean = self.ID2sum[curID] = embedding[i]
 
+					intraclassDist = F.l1_loss(embedding[i], mean)
+#					interclassDist = torch.zeros(1, requires_grad=True)
+#					for key in self.prevMean.keys():
+#						if key is not curID:
+#							d = F.l1_loss(embedding[i], self.prevMean[key])
+#							interclassDist = interclassDist + d / (len(self.prevMean) - 1) 
+
+					clusteringLoss = clusteringLoss + intraclassDist #- interclassDist
+
+
+			clusteringLoss = clusteringLoss / pred.size(0)
 			loss = clusteringLoss + reconstructionLoss #+ regularizationLoss
 			
 			if(self.lossType == LossType.BOTH or self.lossType == LossType.CLUSTERING):
@@ -74,5 +87,6 @@ class MaxSqError:
 		if(self.epoch % self.resetMeanInEpochs == 0):
 			self.ID2sum= {}
 			self.ID2count = {}
+			self.prevMean = {}
 		self.epoch += 1
 

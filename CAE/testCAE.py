@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import torch
 from tensorboardX import SummaryWriter
 from PReIDDataset import PReIDDataset
-from PReIDDataset import DatasetType
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 import torchvision.utils as utils
@@ -44,27 +43,24 @@ def test(val_loader, model):
 			input_img[:, 2, :, :] = input_img[:, 2, :, :] * std[2] + mean[2]
 			input_img = input_img.cpu()
 			
-			pilImg = F.to_pil_image(output)
-			pilImg.save('segmented','.png')
-			break;
-			
 			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
-			writer.add_image("cae/im_" + str(i), img, i)
+			#writer.add_image("cae/im_" + str(i), img, i)
 
-def main():
-	model_path = sys.argv[1]
+def start_testing(model_path, img_size, valPath = "/datasets/DukeSegmented/val"):
 	checkpoint = torch.load(model_path)
 	model = CAE(img_size, should_decode=True)
 	model.cuda()
-	model.load_state_dict(checkpoint['state_dict'])
+	model.load(checkpoint['state_dict'])
 	
 	val_loader = torch.utils.data.DataLoader(
-			PReIDDataset(DatasetType.VAL, transform=transforms.Compose([
+			PReIDDataset(path=valPath, transform=transforms.Compose([
 				transforms.Resize(img_size),
 				transforms.ToTensor(),
 				transforms.Normalize(mean=mean, std=std),
 			])),
 			batch_size=1, shuffle=False,
 			num_workers=4, pin_memory=True)
-
 	test(val_loader, model)
+
+if __name__ == "__main__":
+	start_testing(sys.argv[1], img_size)
