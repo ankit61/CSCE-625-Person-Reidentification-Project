@@ -54,7 +54,7 @@ class SiameseSampler(torch.utils.data.Sampler):
         return iter(self.total)
 
 class SiameseDataset(torch.utils.data.Dataset):
-    def __init__(self, path="/datasets/DukeSegmented/train/", test=False):
+    def __init__(self, path="/datasets/DukeSegmented/train/", test=False, valpath=None):
         self.path = path
         self.imgfilenames = sorted(
             [filename for _, _, filename in os.walk(path)][0])
@@ -83,20 +83,23 @@ class SiameseDataset(torch.utils.data.Dataset):
             ]
         )
 
+    
         imgname1 = self.dataclass[key[0]][key[2]]
         imgname2 = self.dataclass[key[1]][key[3]]
 
         img1 = Image.open(self.path + imgname1)
         img2 = Image.open(self.path + imgname2)
-        
+    
         if key[0] == key[1]:
             same = 1
         else:
             same = 0
 
         imgtensor1, imgtensor2 = tensor_trans([img1, img2])
-
-        return imgtensor1, imgtensor2, same
+        if test == True:
+            return imgtensor1, imgtensor2, same, key[0], key[1]
+        else:
+            return imgtensor1, imgtensor2, same
 
 #temporary tests
 #s = SiameseDataset("/datasets/DukeSegmented/train/")
