@@ -70,7 +70,6 @@ def evaluate(ql, qc, gl, gc):
 	return compute_mAP(gl, good_index, junk_index, bad_index)
 
 def createStats(query, gallery):
-	
 	imgclass = int(query[0:4])
 	labels = [int(label[0:4]) for label in gallery]
 	score_tup = evaluate(np.array([imgclass]), [], np.array(labels), [])
