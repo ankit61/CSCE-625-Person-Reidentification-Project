@@ -46,26 +46,22 @@ class MaxSqError:
 							for key in self.prevMean.keys():
 								self.prevMean[key] = self.ID2sum[key] / self.ID2count[key]
 						
-						if(curID in self.prevMean):
-							mean = self.prevMean[curID]
-						else:
-							mean = self.ID2sum[curID] / self.ID2count[curID]
-							self.prevMean[curID] = mean
-						
+						mean = self.prevMean[curID]
+
 						self.ID2count[curID] += 1
 						self.ID2sum[curID] += embedding[i]
 					else:
 						self.ID2count[curID] = 1
 						self.prevMean[curID] = mean = self.ID2sum[curID] = embedding[i]
 
-					intraclassDist = F.l1_loss(embedding[i], mean)
+					intraclassDist = F.mse_loss(embedding[i], mean)
 #					interclassDist = torch.zeros(1, requires_grad=True)
 #					for key in self.prevMean.keys():
 #						if key is not curID:
 #							d = F.l1_loss(embedding[i], self.prevMean[key])
 #							interclassDist = interclassDist + d / (len(self.prevMean) - 1) 
 
-					clusteringLoss = clusteringLoss + intraclassDist #- interclassDist
+					clusteringLoss = clusteringLoss + 255 * intraclassDist #- interclassDist
 
 
 			clusteringLoss = clusteringLoss / pred.size(0)

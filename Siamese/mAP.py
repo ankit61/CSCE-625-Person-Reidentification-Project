@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import torch
 import scipy.io
@@ -177,34 +178,14 @@ def generateResults(query_path, gallery_path, model_path):
 
 
 def main_test():
-	"""
-	query = "1234c"
-	gallery = np.array([
-		"1234c",
-		"1234c",
-		"1234c",
-		"1234c",
-		"3234c",
-		"9234c",
-		"9234c",
-		"8234c",
-		"3234c",
-		"4234c",
-		"4234c",
-		"2234c",
-		"2234c",
-		"3234c",
-		"3234c",
-		"1234c",
-		"3234c",
-		"0234c",
-		"1234c",
-		"0234c",
-		"1234c"
-	])
 
-	print(createStats(query, gallery))
-	"""
+	query_path  = sys.argv[1]
+	gallery_dir = sys.argv[2]
+	
+	gallery_imgfiles = np.array([filename for _, _, filename in os.walk(gallery_dir)][0])
+	print(len(gallery_imgfiles))
+
+	print(createStats(query_path, gallery_imgfiles))
 
 	generateResults("/datasets/TAMUvalSegmented/query/", "/datasets/TAMUvalSegmented/gallery/", "/home/ankit/csce-625-person-re-identification/Siamese/trained_resnets/checkpoint_33.tar")
 if __name__=="__main__":

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import torch
 import argparse
+import os
 import torchvision.transforms as transforms
 from dataset import SiameseDataset
 from dataset import SiameseSampler
@@ -62,6 +63,7 @@ def test(_test_loader, _model, _criterion, _epoch, _print_freq):
 	_model.eval()
 
 	with torch.no_grad():
+		avgLoss = 0
 		for i, (x, y, isSame) in enumerate(_test_loader):		
 			xVar = torch.autograd.Variable(x).cuda()
 			yVar = torch.autograd.Variable(y).cuda()
@@ -69,9 +71,15 @@ def test(_test_loader, _model, _criterion, _epoch, _print_freq):
 			xNN, yNN = _model(xVar, yVar)
 			loss = _criterion(xNN, yNN, isSame)
 
+			avgLoss += loss
+
 			if(i % _print_freq == 0):
 				print('Epoch[' + str(i) + '/' + str(len(_test_loader)) + ']:\tLoss: ' + str(loss))
 				g_writer.add_scalar('val_loss' , loss.item(), _epoch * len(_test_loader) + i)
+
+		avgLoss /= len(_test_loader)
+
+		return avgLoss
 
 def main():
 	args		= g_parser.parse_args()
@@ -128,13 +136,13 @@ def main():
 
 		loss = test(test_loader, model, criterion, epoch, 20)
 
-		if(loss < best_loss):
+		if(loss < best_loss or epoch % 20 == 0):
 			best_loss = min(loss, best_loss)
 			save_checkpoint({
 				'epoch': epoch + 1,
 				'state_dict': model.state_dict(),
 				'loss': best_loss,
-			}, true, filename=os.path.join(args.save_dir, 'checkpoint_{}.tar'.format(epoch)))
+			}, True, filename=os.path.join(args.save_dir, 'checkpoint_{}.tar'.format(epoch)))
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
 	torch.save(state, filename)
