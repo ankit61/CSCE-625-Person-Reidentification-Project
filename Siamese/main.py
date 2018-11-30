@@ -9,6 +9,7 @@ import torch.backends.cudnn as cudnn
 from network import Siamese
 from contrastiveLoss import ContrastiveLoss
 from tensorboardX import SummaryWriter
+from mAP import generateResults
 
 g_writer = SummaryWriter("/runs/siamese")
 MEAN		= [0.216, 0.2074816, 0.22934238]
@@ -60,6 +61,7 @@ def train(_train_loader, _model, _criterion, _optimizer, _epoch, _print_freq):
 			g_writer.add_scalar('training_loss' , loss.item(), _epoch * len(_train_loader) + i)
 
 def test(_test_loader, _model, _criterion, _epoch, _print_freq):
+	"""
 	_model.eval()
 
 	with torch.no_grad():
@@ -78,8 +80,18 @@ def test(_test_loader, _model, _criterion, _epoch, _print_freq):
 				g_writer.add_scalar('val_loss' , loss.item(), _epoch * len(_test_loader) + i)
 
 		avgLoss /= len(_test_loader)
+	"""
 
-		return avgLoss
+
+	top1, top5, top10, ap = generateResults(
+		"/datasets/TAMUvalSegmented/query/", 
+		"/datasets/TAMUvalSegmented/gallery/", 
+		_model
+	)
+
+
+
+	return avgLoss
 
 def main():
 	args		= g_parser.parse_args()

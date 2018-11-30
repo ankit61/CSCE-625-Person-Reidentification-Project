@@ -106,20 +106,23 @@ def getDists(query_img, gallery_loader, model):
 				#dists.append((F.mse_loss(gallery_feature, query_feature), filename))
 				dists.append((gallery_feature, filename))
 
-	#                       img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
+	#   img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
 		return dists
 
-def generateResults(query_path, gallery_path, model_path):
-		checkpoint = torch.load(model_path)
-		model = Siamese()
-		model.cuda()
-		model.load(checkpoint['state_dict'])
+def generateResults(query_path, gallery_path, model=None, modelpath="/home/ankit/csce-625-person-re-identification/Siamese/trained_resnets/checkpoint_33.tar"):
+		if model:
+			model.cuda()
+		else:
+			checkpoint = torch.load(model_path)
+			model = Siamese()
+			model.cuda()
+			model.load(checkpoint['state_dict'])
 
 		imgTransforms = transforms.Compose([
-								transforms.Resize(img_size),
-								transforms.ToTensor(),
-								transforms.Normalize(mean=mean, std=std),
-						])
+				transforms.Resize(img_size),
+				transforms.ToTensor(),
+				transforms.Normalize(mean=mean, std=std),
+		])
 		query_list = sorted([filename for _, _, filename in os.walk(query_path)][0])
 		count = 1
 		total = len(query_list)
@@ -174,7 +177,8 @@ def generateResults(query_path, gallery_path, model_path):
 		CMC /= len(query_list)
 		ap /= len(query_list)
 
-		print('top1: %.4f, top5: %.4f, top10: %.4f, mAP: %.4f' % (CMC[0], CMC[4], CMC[9], ap))
+		#print('top1: %.4f, top5: %.4f, top10: %.4f, mAP: %.4f' % (CMC[0], CMC[4], CMC[9], ap))
+		return (CMC[0], CMC[4], CMC[9], ap)
 
 
 def main_test():
@@ -187,7 +191,8 @@ def main_test():
 
 	print(createStats(query_path, gallery_imgfiles))
 
-	generateResults("/datasets/TAMUvalSegmented/query/", "/datasets/TAMUvalSegmented/gallery/", "/home/ankit/csce-625-person-re-identification/Siamese/trained_resnets/checkpoint_33.tar")
+	generateResults("/datasets/TAMUvalSegmented/query/", "/datasets/TAMUvalSegmented/gallery/", model_path="/home/ankit/csce-625-person-re-identification/Siamese/trained_resnets/checkpoint_33.tar")
+
 if __name__=="__main__":
 	main_test()
 
