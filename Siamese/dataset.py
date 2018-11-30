@@ -1,12 +1,12 @@
 import sys
 import os
 import torch
-import torchvision.transforms as transforms
 import PIL
 from PIL import Image
 from itertools import combinations, product
 from functools import reduce
 from random import shuffle, sample
+import torchvision.transforms as transforms
 
 def random_combination(iterable, r):
 	"Random selection from itertools.combinations(iterable, r)"
@@ -104,36 +104,15 @@ class SimpleDataset(torch.utils.data.Dataset):
 		return [name for name in self.imgfilenames]
 	
 	def __len__(self):
-		return len(self.dataclass)
+		return len(self.imgfilenames)
 
 	def __getitem__(self, key):
 
 		imgname1 = self.imgfilenames[key]
 
-		img1 = Image.open(self.path + imgname1)
+		img1 = Image.open(os.path.join(self.path, imgname1))
 
 		imgtensor1 = self.transforms(img1)
 		
 		return imgtensor1, imgname1
 
-
-#temporary tests
-s = SimpleDataset("/datasets/DukeSegmented/train/", [])
-
-print(s[0])
-
-"""
-print(
-	s[1495, 1492, 0, 0]
-)
-"""
-
-#print(s.getList())
-#print(s.getClassLength(1492))
-#print(s.getClassLength(1495))
-
-#s_sampler = SiameseSampler(s)
-#print (len(s_sampler))
-#print ([key for key in s_sampler])
-#print (s[13, 13, 33, 0])
- 

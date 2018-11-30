@@ -1,11 +1,14 @@
+#!/usr/bin/env python3
 import os
+from PIL import Image
 import torch
-import scipy.io
+import sys
 import argparse
 import numpy as np
-
-
-writer = SummaryWriter("/runs/")
+from dataset import SimpleDataset
+import torchvision.transforms as transforms
+import torch.nn.functional as F
+from network import Siamese
 
 img_size = (208, 76)
 mean = [0.216, 0.2074816, 0.22934238]
@@ -20,13 +23,13 @@ def getDists(query_img, gallery_loader, model):
 	dists = []
 	with torch.no_grad():
 		for (gallery_img, filename) in gallery_loader:
-			target = target.cuda(async=True)
 			input_var = torch.autograd.Variable(gallery_img, volatile=True).cuda()
 
 			# compute output
 			query_feature, gallery_feature = model(query_img, input_var)
-
-			dists.append((F.mse_loss(gallery_feature, query_features), filename))
+			
+			##################### IS MSE RIGHT? ###############################
+			dists.append((F.mse_loss(gallery_feature, query_feature), filename))
 						
 #			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
 
@@ -34,7 +37,7 @@ def getDists(query_img, gallery_loader, model):
 
 def generateResults(query_path, gallery_path, model_path, k = 5):
 	checkpoint = torch.load(model_path)
-	model = CAE(img_size, should_decode=False)
+	model = Siamese() 
 	model.cuda()
 	model.load(checkpoint['state_dict'])
 
@@ -49,7 +52,7 @@ def generateResults(query_path, gallery_path, model_path, k = 5):
 	query_tensor = query_tensor.view(1, query_tensor.size(0), query_tensor.size(1), query_tensor.size(2))
 	
 	gallery_loader = torch.utils.data.DataLoader(
-			Dataset(path=gallery_path, transform=imgTransforms),
+			SimpleDataset(path=gallery_path, transforms=imgTransforms),
 			batch_size=1, shuffle=False,
 			num_workers=4, pin_memory=True)
 
@@ -63,7 +66,8 @@ def generateResults(query_path, gallery_path, model_path, k = 5):
 	#img = utils.make_grid(torch.cat((input_img, output), 0), nrow=k)
 
 def main():
-
+	bestImgNames = generateResults(sys.argv[1], sys.argv[2], sys.argv[3])
+	print(bestImgNames)
 
 if __name__ == '__main__':
 	main()
