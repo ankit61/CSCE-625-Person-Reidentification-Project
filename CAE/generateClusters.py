@@ -35,8 +35,8 @@ def getDists(query_embedding, gallery_loader, model):
 			# compute output
 			model(input_var)
 
-			#dists.append((F.mse_loss(model.embedding, query_embedding), filename))
-			dists.append((F.mse_loss(model.code, query_embedding), filename))
+			dists.append((F.l1_loss(model.embedding, query_embedding), filename))
+#			dists.append((F.mse_loss(model.code, query_embedding), filename))
 						
 #			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
 
@@ -58,7 +58,7 @@ def generateResults(query_path, gallery_path, model_path, k = 5):
 	query_tensor = torch.autograd.Variable(query_tensor, volatile=True).cuda()
 
 	model(query_tensor.view(1, query_tensor.size(0), query_tensor.size(1), query_tensor.size(2)))
-	query_embedding = model.code
+	query_embedding = model.embedding
 
 	gallery_loader = torch.utils.data.DataLoader(
 			PReIDDataset(path=gallery_path, transform=imgTransforms),
