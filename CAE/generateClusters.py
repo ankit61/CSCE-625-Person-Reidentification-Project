@@ -35,8 +35,8 @@ def getDists(query_embedding, gallery_loader, model):
 			# compute output
 			model(input_var)
 
-			dists.append((F.l1_loss(model.embedding, query_embedding), filename))
-#			dists.append((F.mse_loss(model.code, query_embedding), filename))
+			#dists.append((F.mse_loss(model.embedding, query_embedding), filename))
+			dists.append((F.mse_loss(model.embedding, query_embedding), filename))
 						
 #			img = utils.make_grid(torch.cat((input_img, output), 0), nrow=2)
 
@@ -70,7 +70,7 @@ def generateResults(query_path, gallery_path, model_path, k = 5):
 
 	bestImgNames = [ el[1] for el in dists[0:k]]
 
-	print(bestImgNames)
+	#print(bestImgNames)
 	return bestImgNames
 
 	#img = utils.make_grid(torch.cat((input_img, output), 0), nrow=k)
