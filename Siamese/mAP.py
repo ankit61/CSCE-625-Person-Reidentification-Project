@@ -6,7 +6,8 @@ import numpy as np
 #############################################################################
 # Computing mAP
 #############################################################################
-def compute_mAP(index, good_index, junk_index):
+#THIS NEEDS TO BE LOOKED AT AGAIN!!!!!!
+def compute_mAP(index, good_index, junk_index, bad_index):
 	ap = 0
 	cmc = torch.IntTensor(len(index)).zero_()
 	if good_index.size == 0:
@@ -18,15 +19,22 @@ def compute_mAP(index, good_index, junk_index):
 	index = index[mask]
 	print(index)
 
-	# find good_index index
+	#find good_index index
 	ngood = len(good_index)
 	mask = np.in1d(index, good_index)
 	print(mask)
+
 	rows_good = np.argwhere(mask == True)
 	rows_good = rows_good.flatten()
-
-
+	
+	#Part that Benton wrote because Ye's stuff was throwing an error
+	#for i in range(0, len(bad_index)):
+	#	index[bad_index[i]] = 0 
+	#rows_good = index
+	
+	
 	#Part where mAP actually gets calculated
+
 	cmc[rows_good[0]:] = 1
 	for i in range(ngood):
 		d_recall = 1.0 / ngood
@@ -46,14 +54,20 @@ def evaluate(ql, qc, gl, gc):
 	camera_index = np.argwhere(gc == qc)
 
 	good_index = np.setdiff1d(query_index, camera_index, assume_unique=True)
-
+	
+	#hotfix for the code to work without cameras
+	for i in range(0,len(good_index)):
+		good_index[i] = gl[good_index[i]]  	
 	print(good_index)
 
 	junk_index1 = np.argwhere(gl == -1)
 	junk_index2 = np.intersect1d(query_index, camera_index)
 	junk_index = np.append(junk_index2, junk_index1)
 
-	return compute_mAP(gl, good_index, junk_index)
+	bad_index = np.argwhere(gl != ql)
+	bad_index = bad_index.flatten(-1)
+	
+	return compute_mAP(gl, good_index, junk_index, bad_index)
 
 def createStats(query, gallery):
 	
@@ -65,27 +79,27 @@ def createStats(query, gallery):
 def main_test():
 	query = "1234c"
 	gallery = np.array([
-		"5234c",
 		"1234c",
-		"5234c",
+		"1234c",
+		"1234c",
 		"1234c",
 		"3234c",
 		"9234c",
 		"9234c",
 		"8234c",
-		"1234c",
+		"3234c",
 		"4234c",
 		"4234c",
+		"2234c",
+		"2234c",
+		"3234c",
+		"3234c",
 		"1234c",
-		"6234c",
-		"1234c",
-		"1234c",
-		"1334c",
+		"3234c",
+		"0234c",
 		"1234c",
 		"0234c",
-		"0234c",
-		"0234c",
-		"1231c"
+		"1234c"
 	])
 
 	print(createStats(query, gallery))
