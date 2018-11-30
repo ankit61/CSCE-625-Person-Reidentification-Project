@@ -95,7 +95,7 @@ class SiameseDataset(torch.utils.data.Dataset):
 
 
 #temporary tests
-s = SiameseDataset("/datasets/DukeSegmented/train/", [])
+#s = SiameseDataset("/datasets/DukeSegmented/train/", [])
 
 """
 print(
@@ -107,8 +107,8 @@ print(
 #print(s.getClassLength(1492))
 #print(s.getClassLength(1495))
 
-s_sampler = SiameseSampler(s)
-print (len(s_sampler))
+#s_sampler = SiameseSampler(s)
+#print (len(s_sampler))
 #print ([key for key in s_sampler])
 #print (s[13, 13, 33, 0])
  
