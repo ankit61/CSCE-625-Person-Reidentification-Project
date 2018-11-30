@@ -200,7 +200,7 @@ valid_transform = ComposeJoint(
 
 
 def process_images(dataset_dir, processed_dir, batchsize):
-    with SegmentationNetwork() as fcn:
+    with SegmentationNetwork('best.pth') as fcn:
         if(batchsize == 1):
             print('Segmenting Query image...')
         else:
