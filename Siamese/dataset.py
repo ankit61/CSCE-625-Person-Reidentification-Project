@@ -90,7 +90,7 @@ class SiameseDataset(torch.utils.data.Dataset):
         return imgtensor1, imgtensor2, same
 
 #temporary tests
-s = SiameseDataset("/datasets/DukeSegmented/train/")
+#s = SiameseDataset("/datasets/DukeSegmented/train/")
 
 """
 print(
@@ -102,8 +102,8 @@ print(
 #print(s.getClassLength(1492))
 #print(s.getClassLength(1495))
 
-s_sampler = SiameseSampler(s, 0, 50)
-print (len(s_sampler))
+#s_sampler = SiameseSampler(s, 0, 50)
+#print (len(s_sampler))
 #print ([key for key in s_sampler])
-print (s[13, 13, 33, 0])
+#print (s[13, 13, 33, 0])
  
