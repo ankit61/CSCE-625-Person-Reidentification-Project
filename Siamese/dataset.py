@@ -9,34 +9,43 @@ import PIL
 from PIL import Image
 from itertools import combinations, product
 from functools import reduce
-from random import shuffle
+from random import shuffle, sample
 
 from pytorch_segmentation_detection.transforms import (
     ComposeJoint,
     RandomHorizontalFlipJoint
 )
 
+def random_combination(iterable, r):
+    "Random selection from itertools.combinations(iterable, r)"
+    pool = tuple(iterable)
+    n = len(pool)
+    indices = sorted(sample(range(n), r))
+    return [pool[i] for i in indices]
 
 class SiameseSampler(torch.utils.data.Sampler):
-    def __init__(self, data_source, start, end):
-        self.classes = data_source.getList()[start:end]
+    def __init__(self, data_source):
+        self.classes = data_source.getList()
         # construct the keys
         self.total = []
-        pairs = combinations(self.classes, 2)
-        pairs = list(pairs)
-        for val in self.classes:
-            pairs.append(
-                (val, val)
-            )
+        diff_pairs = random_combination(combinations(self.classes, 2), 2250)
+        same_pairs = sample([(c, c) for c in self.classes], 225)
+
+        #print(len(diff_pairs))
+        #print(len(same_pairs))
+        pairs = diff_pairs + same_pairs
+        
         for pair in pairs:
             rng1 = range(0, data_source.getClassLength(pair[0]))
             rng2 = range(0, data_source.getClassLength(pair[1]))
-            rngboth = product(rng1, rng2)
-            for tup in rngboth:
+            rngboth = tuple(product(rng1, rng2)) 
+            indices = random_combination(rngboth, 5)
+
+            for tup in indices:
                 self.total.append(
                     (pair[0], pair[1], tup[0], tup[1])
                 )
-        
+
         shuffle(self.total)
 
     def __len__(self):
@@ -45,7 +54,7 @@ class SiameseSampler(torch.utils.data.Sampler):
         return iter(self.total)
 
 class SiameseDataset(torch.utils.data.Dataset):
-    def __init__(self, path="/datasets/DukeSegmented/train/"):
+    def __init__(self, path="/datasets/DukeSegmented/train/", test=False):
         self.path = path
         self.imgfilenames = sorted(
             [filename for _, _, filename in os.walk(path)][0])
@@ -102,7 +111,7 @@ print(
 #print(s.getClassLength(1492))
 #print(s.getClassLength(1495))
 
-#s_sampler = SiameseSampler(s, 0, 50)
+#s_sampler = SiameseSampler(s)
 #print (len(s_sampler))
 #print ([key for key in s_sampler])
 #print (s[13, 13, 33, 0])
