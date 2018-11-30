@@ -9,43 +9,43 @@ from functools import reduce
 from random import shuffle, sample
 
 def random_combination(iterable, r):
-    "Random selection from itertools.combinations(iterable, r)"
-    pool = tuple(iterable)
-    n = len(pool)
-    indices = sorted(sample(range(n), r))
-    return [pool[i] for i in indices]
+	"Random selection from itertools.combinations(iterable, r)"
+	pool = tuple(iterable)
+	n = len(pool)
+	indices = sorted(sample(range(n), r))
+	return [pool[i] for i in indices]
 
 class SiameseSampler(torch.utils.data.Sampler):
-    def __init__(self, data_source):
-        self.classes = data_source.getList()
-        # construct the keys
-        self.total = []
-        diff_pairs = random_combination(combinations(self.classes, 2), 2250)
-        same_pairs = sample([(c, c) for c in self.classes], 250)
+	def __init__(self, data_source):
+		self.classes = data_source.getList()
+		# construct the keys
+		self.total = []
+		diff_pairs = random_combination(combinations(self.classes, 2), 2250)
+		same_pairs = sample([(c, c) for c in self.classes], 250)
 
-        #print(len(diff_pairs))
-        #print(len(same_pairs))
-        pairs = diff_pairs + same_pairs
-        for pair in pairs:
-            rng1 = range(0, data_source.getClassLength(pair[0]))
-            rng2 = range(0, data_source.getClassLength(pair[1]))
-            rngboth = tuple(product(rng1, rng2)) 
-            sample_n = 5
-            if len(rngboth) < 5:
-                sample_n = len(rngboth)
-            indices = random_combination(rngboth, sample_n)
+		#print(len(diff_pairs))
+		#print(len(same_pairs))
+		pairs = diff_pairs + same_pairs
+		for pair in pairs:
+			rng1 = range(0, data_source.getClassLength(pair[0]))
+			rng2 = range(0, data_source.getClassLength(pair[1]))
+			rngboth = tuple(product(rng1, rng2)) 
+			sample_n = 5
+			if len(rngboth) < 5:
+				sample_n = len(rngboth)
+			indices = random_combination(rngboth, sample_n)
 
-            for tup in indices:
-                self.total.append(
-                    (pair[0], pair[1], tup[0], tup[1])
-                )
+			for tup in indices:
+				self.total.append(
+					(pair[0], pair[1], tup[0], tup[1])
+				)
 
-        shuffle(self.total)
+		shuffle(self.total)
 
-    def __len__(self):
-        return len(self.total)
-    def __iter__(self):
-        return iter(self.total)
+	def __len__(self):
+		return len(self.total)
+	def __iter__(self):
+		return iter(self.total)
 
 class SiameseDataset(torch.utils.data.Dataset):
 	def __init__(self, path, transforms, test=False, valpath=None):
@@ -89,17 +89,42 @@ class SiameseDataset(torch.utils.data.Dataset):
 		imgtensor2 = self.transforms(img2)
 
 		if self.test == True:
-			return imgtensor1, imgtensor2, same, key[0], key[1]
+			return imgtensor1, imgtensor2, same, imgname1, imgname2
 		else:
 			return imgtensor1, imgtensor2, same
 
+class SimpleDataset(torch.utils.data.Dataset):
+	def __init__(self, path, transforms):
+		self.path = path
+		self.imgfilenames = sorted(
+			[filename for _, _, filename in os.walk(path)][0])
+		self.transforms = transforms
+	
+	def getList(self):
+		return [name for name in self.imgfilenames]
+	
+	def __len__(self):
+		return len(self.dataclass)
+
+	def __getitem__(self, key):
+
+		imgname1 = self.imgfilenames[key]
+
+		img1 = Image.open(self.path + imgname1)
+
+		imgtensor1 = self.transforms(img1)
+		
+		return imgtensor1, imgname1
+
 
 #temporary tests
-#s = SiameseDataset("/datasets/DukeSegmented/train/", [])
+s = SimpleDataset("/datasets/DukeSegmented/train/", [])
+
+print(s[0])
 
 """
 print(
-    s[1495, 1492, 0, 0]
+	s[1495, 1492, 0, 0]
 )
 """
 
