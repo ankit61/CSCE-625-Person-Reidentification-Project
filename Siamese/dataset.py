@@ -104,13 +104,13 @@ class SimpleDataset(torch.utils.data.Dataset):
 		return [name for name in self.imgfilenames]
 	
 	def __len__(self):
-		return len(self.dataclass)
+		return len(self.imgfilenames)
 
 	def __getitem__(self, key):
 
 		imgname1 = self.imgfilenames[key]
 
-		img1 = Image.open(self.path + imgname1)
+		img1 = Image.open(os.path.join(self.path, imgname1))
 
 		imgtensor1 = self.transforms(img1)
 		
@@ -118,9 +118,9 @@ class SimpleDataset(torch.utils.data.Dataset):
 
 
 #temporary tests
-s = SimpleDataset("/datasets/DukeSegmented/train/", [])
+#s = SimpleDataset("/datasets/DukeSegmented/train/", [])
 
-print(s[0])
+#print(s[0])
 
 """
 print(
