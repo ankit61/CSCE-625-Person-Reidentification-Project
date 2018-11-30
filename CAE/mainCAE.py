@@ -35,7 +35,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 					help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=64, type=int,
 					metavar='N', help='mini-batch size (default: 64)')
-parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.000001, type=float,
 					metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 					help='momentum')
@@ -67,7 +67,7 @@ def main():
 	if not os.path.exists(args.save_dir):
 		os.makedirs(args.save_dir)
 
-	model = CAE(input_size, should_decode = False, freeze_encoder = True)
+	model = CAE(input_size, should_decode = False, freeze_encoder = False)
 
 	# model.features = torch.nn.DataParallel(model.features)
 	model.cuda()
@@ -77,7 +77,7 @@ def main():
 		if os.path.isfile(args.resume):
 			print("=> loading checkpoint '{0}'".format(args.resume))
 			checkpoint = torch.load(args.resume)
-			args.start_epoch = checkpoint['epoch']
+			#args.start_epoch = checkpoint['epoch']
 			best_loss = checkpoint['loss']
 			model.load(checkpoint['state_dict'])
 			print("=> loaded checkpoint '{}' (epoch {})"
@@ -120,7 +120,7 @@ def main():
 	# define loss function (criterion) and pptimizer
 	criterion = MaxSqError(args.reg_const, lossType=LossType.CLUSTERING)
 
-	optimizer = torch.optim.Adam(model.parameters(), args.lr)
+	optimizer = torch.optim.SGD(model.parameters(), args.lr, momentum=args.momentum)
 
 	if args.evaluate:
 		validate(val_loader, model, criterion)
@@ -273,5 +273,3 @@ def adjust_learning_rate(optimizer, epoch):
 	for param_group in optimizer.param_groups:
 		param_group['lr'] = lr
 
-if __name__ == '__main__':
-	main()

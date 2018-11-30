@@ -60,7 +60,6 @@ def start_testing(model_path, img_size, valPath = "/datasets/DukeSegmented/val")
 			])),
 			batch_size=1, shuffle=False,
 			num_workers=4, pin_memory=True)
-
 	test(val_loader, model)
 
 if __name__ == "__main__":
