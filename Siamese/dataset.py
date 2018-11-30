@@ -59,7 +59,7 @@ class SiameseDataset(torch.utils.data.Dataset):
 				self.dataclass[classname] = [name]
 			else:
 				self.dataclass[classname].append(name)
-		
+		self.test = test
 		self.transforms = transforms
 	
 	def getClassLength(self, classname):
@@ -88,7 +88,7 @@ class SiameseDataset(torch.utils.data.Dataset):
 		imgtensor1 = self.transforms(img1)
 		imgtensor2 = self.transforms(img2)
 
-		if test == True:
+		if self.test == True:
 			return imgtensor1, imgtensor2, same, key[0], key[1]
 		else:
 			return imgtensor1, imgtensor2, same
