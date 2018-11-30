@@ -9,6 +9,7 @@ import PIL
 from PIL import Image
 from itertools import combinations, product
 from functools import reduce
+from random import shuffle
 
 from pytorch_segmentation_detection.transforms import (
     ComposeJoint,
@@ -22,6 +23,11 @@ class SiameseSampler(torch.utils.data.Sampler):
         # construct the keys
         self.total = []
         pairs = combinations(self.classes, 2)
+        pairs = list(pairs)
+        for val in self.classes:
+            pairs.append(
+                (val, val)
+            )
         for pair in pairs:
             rng1 = range(0, data_source.getClassLength(pair[0]))
             rng2 = range(0, data_source.getClassLength(pair[1]))
@@ -30,13 +36,15 @@ class SiameseSampler(torch.utils.data.Sampler):
                 self.total.append(
                     (pair[0], pair[1], tup[0], tup[1])
                 )
+        
+        shuffle(self.total)
 
     def __len__(self):
         return len(self.total)
     def __iter__(self):
         return iter(self.total)
 
-class SiameseLoader(torch.utils.data.Dataset):
+class SiameseDataset(torch.utils.data.Dataset):
     def __init__(self, path="/datasets/DukeSegmented/train/"):
         self.path = path
         self.imgfilenames = sorted(
@@ -72,11 +80,17 @@ class SiameseLoader(torch.utils.data.Dataset):
         img1 = Image.open(self.path + imgname1)
         img2 = Image.open(self.path + imgname2)
         
+        if key[0] == key[1]:
+            same = 1
+        else:
+            same = 0
 
-        return tensor_trans([img1, img2])
+        imgtensor1, imgtensor2 = tensor_trans([img1, img2])
+
+        return imgtensor1, imgtensor2, same
 
 #temporary tests
-#s = SiameseLoader("/datasets/DukeSegmented/train/")
+s = SiameseDataset("/datasets/DukeSegmented/train/")
 
 """
 print(
@@ -88,7 +102,8 @@ print(
 #print(s.getClassLength(1492))
 #print(s.getClassLength(1495))
 
-#s_sampler = SiameseSampler(s, 0, 30)
-#print (len(s_sampler))
-#for key in s_sampler:
-#    print(key) 
+s_sampler = SiameseSampler(s, 0, 50)
+print (len(s_sampler))
+#print ([key for key in s_sampler])
+print (s[13, 13, 33, 0])
+ 
