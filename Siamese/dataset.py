@@ -1,8 +1,5 @@
 import sys
 import os
-sys.path.append('../')
-sys.path.append("/pytorch-segmentation/pytorch-segmentation-detection/")
-sys.path.insert(0, '/pytorch-segmentation/pytorch-segmentation-detection/vision/')
 import torch
 import torchvision.transforms as transforms
 import PIL
@@ -49,52 +46,50 @@ class SiameseSampler(torch.utils.data.Sampler):
 		return iter(self.total)
 
 class SiameseDataset(torch.utils.data.Dataset):
-    def __init__(self, path="/datasets/DukeSegmented/train/", test=False, valpath=None):
-        self.path = path
-        self.imgfilenames = sorted(
-            [filename for _, _, filename in os.walk(path)][0])
-        self.dataclass = {}
-        for name in self.imgfilenames:
-            classname = int(name[0:4])
-            if classname not in self.dataclass:
-                self.dataclass[classname] = [name]
-            else:
-                self.dataclass[classname].append(name)
-    
-    def getClassLength(self, classname):
-        return len(self.dataclass[classname])
-    
-    def getList(self):
-        return [name for name in self.dataclass]
-    
-    def __len__(self):
-        return len(self.dataclass)
-    
-    def __getitem__(self, key):
-        # key structure (class1, class2, index1, index2) #
-        tensor_trans = ComposeJoint(
-            [
-                [transforms.ToTensor(), transforms.ToTensor()]
-            ]
-        )
+	def __init__(self, path, transforms, test=False, valpath=None):
+		self.path = path
+		self.imgfilenames = sorted(
+			[filename for _, _, filename in os.walk(path)][0])
+		self.dataclass = {}
+		for name in self.imgfilenames:
+			classname = int(name[0:4])
+			if classname not in self.dataclass:
+				self.dataclass[classname] = [name]
+			else:
+				self.dataclass[classname].append(name)
+		
+		self.transforms = transforms
+	
+	def getClassLength(self, classname):
+		return len(self.dataclass[classname])
+	
+	def getList(self):
+		return [name for name in self.dataclass]
+	
+	def __len__(self):
+		return len(self.dataclass)
+	
+	def __getitem__(self, key):
+		# key structure (class1, class2, index1, index2) #
+	
+		imgname1 = self.dataclass[key[0]][key[2]]
+		imgname2 = self.dataclass[key[1]][key[3]]
 
-    
-        imgname1 = self.dataclass[key[0]][key[2]]
-        imgname2 = self.dataclass[key[1]][key[3]]
+		img1 = Image.open(self.path + imgname1)
+		img2 = Image.open(self.path + imgname2)
+	
+		if key[0] == key[1]:
+			same = 1
+		else:
+			same = 0
 
-        img1 = Image.open(self.path + imgname1)
-        img2 = Image.open(self.path + imgname2)
-    
-        if key[0] == key[1]:
-            same = 1
-        else:
-            same = 0
+		imgtensor1 = self.transforms(img1)
+		imgtensor2 = self.transforms(img2)
 
-        imgtensor1, imgtensor2 = tensor_trans([img1, img2])
-        if test == True:
-            return imgtensor1, imgtensor2, same, key[0], key[1]
-        else:
-            return imgtensor1, imgtensor2, same
+		if test == True:
+			return imgtensor1, imgtensor2, same, key[0], key[1]
+		else:
+			return imgtensor1, imgtensor2, same
 
 
 #temporary tests
