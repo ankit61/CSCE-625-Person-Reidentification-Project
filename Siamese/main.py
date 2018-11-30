@@ -9,8 +9,9 @@ import torch.backends.cudnn as cudnn
 from network import Siamese
 from contrastiveLoss import ContrastiveLoss
 from tensorboardX import SummaryWriter
+from mAP import generateResults
 
-g_writer = SummaryWriter("/runs/siamese")
+g_writer = SummaryWriter("/runs")
 MEAN		= [0.216, 0.2074816, 0.22934238]
 STD			= [0.2333638, 0.22653223, 0.23671082]
 INPUT_SIZE	= (208, 76)
@@ -57,9 +58,10 @@ def train(_train_loader, _model, _criterion, _optimizer, _epoch, _print_freq):
 		if(i % _print_freq == 0):
 			print('Epoch[' + str(_epoch) + '][' + str(i) + '/' + str(len(_train_loader)) + ']:\tLoss:', loss.item())
 
-			g_writer.add_scalar('training_loss' , loss.item(), _epoch * len(_train_loader) + i)
+			g_writer.add_scalar('siamese/training_loss' , loss.item(), _epoch * len(_train_loader) + i)
 
 def test(_test_loader, _model, _criterion, _epoch, _print_freq):
+	"""
 	_model.eval()
 
 	with torch.no_grad():
@@ -78,8 +80,20 @@ def test(_test_loader, _model, _criterion, _epoch, _print_freq):
 				g_writer.add_scalar('val_loss' , loss.item(), _epoch * len(_test_loader) + i)
 
 		avgLoss /= len(_test_loader)
+	"""
 
-		return avgLoss
+	top1, top5, top10, ap = generateResults(
+		"/datasets/TAMUvalSegmented/query/", 
+		"/datasets/TAMUvalSegmented/gallery/", 
+		_model
+	)
+
+	g_writer.add_scalar('siamese/top1' , top1.item(), _epoch)
+	g_writer.add_scalar('siamese/top10' , top10.item(), _epoch)
+	g_writer.add_scalar('siamese/mAP' , ap.item(), _epoch)
+
+
+	return ap
 
 def main():
 	args		= g_parser.parse_args()
@@ -89,7 +103,7 @@ def main():
 	
 	model.cuda()
 	cudnn.benchmark = True
-	best_loss = 1000
+	best_mAP = 0
 
 	normalize = transforms.Normalize(mean=MEAN, std=STD)
 
@@ -134,10 +148,10 @@ def main():
 		adjust_learning_rate(optimizer, epoch, args.lr)
 		train(train_loader, model, criterion, optimizer, epoch, 20)
 
-		loss = test(test_loader, model, criterion, epoch, 20)
+		mAP = test(test_loader, model, criterion, epoch, 20)
 
-		if(loss < best_loss or epoch % 20 == 0):
-			best_loss = min(loss, best_loss)
+		if(mAP > best_mAP or epoch % 20 == 0):
+			best_mAP = min(mAP, best_mAP)
 			save_checkpoint({
 				'epoch': epoch + 1,
 				'state_dict': model.state_dict(),

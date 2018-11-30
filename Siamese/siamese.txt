@@ -1,0 +1,906 @@
+=> loading checkpoint '/home/ankit/csce-625-person-re-identification/Siamese/trained_resnets/checkpoint_33.tar'
+=> loaded checkpoint 'False' (epoch 34)
+Epoch[0][0/196]:	Loss: 38.234031677246094
+Epoch[0][20/196]:	Loss: 1.985427975654602
+Epoch[0][40/196]:	Loss: 3.6538052558898926
+Epoch[0][60/196]:	Loss: 5.417645454406738
+Epoch[0][80/196]:	Loss: 2.958066940307617
+Epoch[0][100/196]:	Loss: 3.812192440032959
+Epoch[0][120/196]:	Loss: 1.264603614807129
+Epoch[0][140/196]:	Loss: 3.6075785160064697
+Epoch[0][160/196]:	Loss: 3.257431983947754
+Epoch[0][180/196]:	Loss: 4.834434509277344
+starting 1/150
+/home/bentong/csce-625-person-re-identification/Siamese/mAP.py:141: UserWarning: volatile was removed and now has no effect. Use `with torch.no_grad():` instead.
+  query_tensor = torch.autograd.Variable(query_tensor, volatile=True).cuda()
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+/home/bentong/csce-625-person-re-identification/Siamese/mAP.py:100: UserWarning: volatile was removed and now has no effect. Use `with torch.no_grad():` instead.
+  input_var = torch.autograd.Variable(gallery_img, volatile=True).cuda()
+Epoch[1][0/196]:	Loss: 2.206702709197998
+Epoch[1][20/196]:	Loss: 1.6700079441070557
+Epoch[1][40/196]:	Loss: 2.6946115493774414
+Epoch[1][60/196]:	Loss: 3.5228826999664307
+Epoch[1][80/196]:	Loss: 3.157496213912964
+Epoch[1][100/196]:	Loss: 2.6696345806121826
+Epoch[1][120/196]:	Loss: 1.9556807279586792
+Epoch[1][140/196]:	Loss: 3.9890923500061035
+Epoch[1][160/196]:	Loss: 3.28847336769104
+Epoch[1][180/196]:	Loss: 3.7769935131073
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[2][0/196]:	Loss: 2.1928184032440186
+Epoch[2][20/196]:	Loss: 1.576459288597107
+Epoch[2][40/196]:	Loss: 3.2834014892578125
+Epoch[2][60/196]:	Loss: 2.8522539138793945
+Epoch[2][80/196]:	Loss: 3.1497204303741455
+Epoch[2][100/196]:	Loss: 2.9014205932617188
+Epoch[2][120/196]:	Loss: 1.369468092918396
+Epoch[2][140/196]:	Loss: 2.9908032417297363
+Epoch[2][160/196]:	Loss: 2.9357025623321533
+Epoch[2][180/196]:	Loss: 3.7739639282226562
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[3][0/196]:	Loss: 1.8723686933517456
+Epoch[3][20/196]:	Loss: 1.9280339479446411
+Epoch[3][40/196]:	Loss: 2.6732468605041504
+Epoch[3][60/196]:	Loss: 2.749981164932251
+Epoch[3][80/196]:	Loss: 3.564302682876587
+Epoch[3][100/196]:	Loss: 2.6916284561157227
+Epoch[3][120/196]:	Loss: 1.0515494346618652
+Epoch[3][140/196]:	Loss: 2.3831863403320312
+Epoch[3][160/196]:	Loss: 3.1055643558502197
+Epoch[3][180/196]:	Loss: 3.7942543029785156
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[4][0/196]:	Loss: 1.693233609199524
+Epoch[4][20/196]:	Loss: 1.8506721258163452
+Epoch[4][40/196]:	Loss: 2.6185648441314697
+Epoch[4][60/196]:	Loss: 2.666034460067749
+Epoch[4][80/196]:	Loss: 2.863616943359375
+Epoch[4][100/196]:	Loss: 2.4571375846862793
+Epoch[4][120/196]:	Loss: 0.9749100208282471
+Epoch[4][140/196]:	Loss: 2.641577959060669
+Epoch[4][160/196]:	Loss: 2.829622745513916
+Epoch[4][180/196]:	Loss: 4.157264709472656
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[5][0/196]:	Loss: 1.5287643671035767
+Epoch[5][20/196]:	Loss: 1.9290248155593872
+Epoch[5][40/196]:	Loss: 2.536012649536133
+Epoch[5][60/196]:	Loss: 2.3856794834136963
+Epoch[5][80/196]:	Loss: 2.6103436946868896
+Epoch[5][100/196]:	Loss: 2.4364724159240723
+Epoch[5][120/196]:	Loss: 0.8865979313850403
+Epoch[5][140/196]:	Loss: 2.5207066535949707
+Epoch[5][160/196]:	Loss: 2.9204535484313965
+Epoch[5][180/196]:	Loss: 3.623234987258911
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[6][0/196]:	Loss: 1.4485833644866943
+Epoch[6][20/196]:	Loss: 1.6662050485610962
+Epoch[6][40/196]:	Loss: 2.3780035972595215
+Epoch[6][60/196]:	Loss: 2.7848105430603027
+Epoch[6][80/196]:	Loss: 3.3570470809936523
+Epoch[6][100/196]:	Loss: 2.423090934753418
+Epoch[6][120/196]:	Loss: 0.7963349223136902
+Epoch[6][140/196]:	Loss: 2.3775441646575928
+Epoch[6][160/196]:	Loss: 2.177718162536621
+Epoch[6][180/196]:	Loss: 3.646365165710449
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[7][0/196]:	Loss: 1.422654390335083
+Epoch[7][20/196]:	Loss: 1.4946798086166382
+Epoch[7][40/196]:	Loss: 2.046797513961792
+Epoch[7][60/196]:	Loss: 2.7400875091552734
+Epoch[7][80/196]:	Loss: 2.9605600833892822
+Epoch[7][100/196]:	Loss: 2.3146400451660156
+Epoch[7][120/196]:	Loss: 0.6841325759887695
+Epoch[7][140/196]:	Loss: 2.360214948654175
+Epoch[7][160/196]:	Loss: 2.162435531616211
+Epoch[7][180/196]:	Loss: 3.7191901206970215
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[8][0/196]:	Loss: 1.2046481370925903
+Epoch[8][20/196]:	Loss: 1.2527806758880615
+Epoch[8][40/196]:	Loss: 2.006053924560547
+Epoch[8][60/196]:	Loss: 2.173738956451416
+Epoch[8][80/196]:	Loss: 2.639629602432251
+Epoch[8][100/196]:	Loss: 2.4159047603607178
+Epoch[8][120/196]:	Loss: 0.8186237812042236
+Epoch[8][140/196]:	Loss: 2.277322769165039
+Epoch[8][160/196]:	Loss: 2.043625593185425
+Epoch[8][180/196]:	Loss: 3.3477554321289062
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[9][0/196]:	Loss: 1.2559880018234253
+Epoch[9][20/196]:	Loss: 1.5069146156311035
+Epoch[9][40/196]:	Loss: 2.1679394245147705
+Epoch[9][60/196]:	Loss: 2.45343279838562
+Epoch[9][80/196]:	Loss: 2.46032977104187
+Epoch[9][100/196]:	Loss: 2.370494842529297
+Epoch[9][120/196]:	Loss: 0.4897609353065491
+Epoch[9][140/196]:	Loss: 2.513547420501709
+Epoch[9][160/196]:	Loss: 1.9284353256225586
+Epoch[9][180/196]:	Loss: 3.882952928543091
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[10][0/196]:	Loss: 1.2066386938095093
+Epoch[10][20/196]:	Loss: 1.2731595039367676
+Epoch[10][40/196]:	Loss: 1.9424889087677002
+Epoch[10][60/196]:	Loss: 2.1571502685546875
+Epoch[10][80/196]:	Loss: 2.291804075241089
+Epoch[10][100/196]:	Loss: 2.233919620513916
+Epoch[10][120/196]:	Loss: 0.4404155910015106
+Epoch[10][140/196]:	Loss: 2.077004909515381
+Epoch[10][160/196]:	Loss: 2.1945078372955322
+Epoch[10][180/196]:	Loss: 3.0447914600372314
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[11][0/196]:	Loss: 1.0600346326828003
+Epoch[11][20/196]:	Loss: 1.3864704370498657
+Epoch[11][40/196]:	Loss: 1.6999592781066895
+Epoch[11][60/196]:	Loss: 2.47393536567688
+Epoch[11][80/196]:	Loss: 1.6744155883789062
+Epoch[11][100/196]:	Loss: 2.7144269943237305
+Epoch[11][120/196]:	Loss: 0.5469395518302917
+Epoch[11][140/196]:	Loss: 1.9433369636535645
+Epoch[11][160/196]:	Loss: 2.080594539642334
+Epoch[11][180/196]:	Loss: 3.064542770385742
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[12][0/196]:	Loss: 1.0509299039840698
+Epoch[12][20/196]:	Loss: 1.43946373462677
+Epoch[12][40/196]:	Loss: 2.0329105854034424
+Epoch[12][60/196]:	Loss: 1.8713037967681885
+Epoch[12][80/196]:	Loss: 1.9362074136734009
+Epoch[12][100/196]:	Loss: 2.0693726539611816
+Epoch[12][120/196]:	Loss: 0.46695733070373535
+Epoch[12][140/196]:	Loss: 1.7765367031097412
+Epoch[12][160/196]:	Loss: 1.8760850429534912
+Epoch[12][180/196]:	Loss: 2.437856912612915
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[13][0/196]:	Loss: 1.3278725147247314
+Epoch[13][20/196]:	Loss: 1.1017428636550903
+Epoch[13][40/196]:	Loss: 2.0040180683135986
+Epoch[13][60/196]:	Loss: 2.4766039848327637
+Epoch[13][80/196]:	Loss: 2.1040899753570557
+Epoch[13][100/196]:	Loss: 1.82935631275177
+Epoch[13][120/196]:	Loss: 0.48361048102378845
+Epoch[13][140/196]:	Loss: 1.6489500999450684
+Epoch[13][160/196]:	Loss: 1.5318810939788818
+Epoch[13][180/196]:	Loss: 2.8362815380096436
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[14][0/196]:	Loss: 0.7424845099449158
+Epoch[14][20/196]:	Loss: 1.400378704071045
+Epoch[14][40/196]:	Loss: 1.8258899450302124
+Epoch[14][60/196]:	Loss: 1.8618779182434082
+Epoch[14][80/196]:	Loss: 1.6902207136154175
+Epoch[14][100/196]:	Loss: 1.6960896253585815
+Epoch[14][120/196]:	Loss: 0.5592241287231445
+Epoch[14][140/196]:	Loss: 1.8034083843231201
+Epoch[14][160/196]:	Loss: 1.4258313179016113
+Epoch[14][180/196]:	Loss: 2.649752378463745
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[15][0/196]:	Loss: 0.9323657751083374
+Epoch[15][20/196]:	Loss: 0.9502755999565125
+Epoch[15][40/196]:	Loss: 1.080078363418579
+Epoch[15][60/196]:	Loss: 1.8333903551101685
+Epoch[15][80/196]:	Loss: 1.5584781169891357
+Epoch[15][100/196]:	Loss: 1.856401801109314
+Epoch[15][120/196]:	Loss: 0.4601159393787384
+Epoch[15][140/196]:	Loss: 1.5610952377319336
+Epoch[15][160/196]:	Loss: 1.2384051084518433
+Epoch[15][180/196]:	Loss: 2.0639779567718506
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[16][0/196]:	Loss: 0.8533080816268921
+Epoch[16][20/196]:	Loss: 1.0324631929397583
+Epoch[16][40/196]:	Loss: 1.330869436264038
+Epoch[16][60/196]:	Loss: 1.6701784133911133
+Epoch[16][80/196]:	Loss: 1.297181248664856
+Epoch[16][100/196]:	Loss: 1.5082447528839111
+Epoch[16][120/196]:	Loss: 0.5108137130737305
+Epoch[16][140/196]:	Loss: 1.2297953367233276
+Epoch[16][160/196]:	Loss: 1.0756391286849976
+Epoch[16][180/196]:	Loss: 2.5410056114196777
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[17][0/196]:	Loss: 0.8999886512756348
+Epoch[17][20/196]:	Loss: 1.4670510292053223
+Epoch[17][40/196]:	Loss: 1.06784987449646
+Epoch[17][60/196]:	Loss: 1.3230154514312744
+Epoch[17][80/196]:	Loss: 1.5187753438949585
+Epoch[17][100/196]:	Loss: 1.598264455795288
+Epoch[17][120/196]:	Loss: 0.30322885513305664
+Epoch[17][140/196]:	Loss: 1.319437861442566
+Epoch[17][160/196]:	Loss: 0.9298453330993652
+Epoch[17][180/196]:	Loss: 1.7182772159576416
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[18][0/196]:	Loss: 0.5145976543426514
+Epoch[18][20/196]:	Loss: 1.2542073726654053
+Epoch[18][40/196]:	Loss: 1.4347631931304932
+Epoch[18][60/196]:	Loss: 1.3471479415893555
+Epoch[18][80/196]:	Loss: 1.374791145324707
+Epoch[18][100/196]:	Loss: 1.2993463277816772
+Epoch[18][120/196]:	Loss: 0.5055556893348694
+Epoch[18][140/196]:	Loss: 1.028017282485962
+Epoch[18][160/196]:	Loss: 1.11380934715271
+Epoch[18][180/196]:	Loss: 2.0440900325775146
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[19][0/196]:	Loss: 0.7517795562744141
+Epoch[19][20/196]:	Loss: 1.1295382976531982
+Epoch[19][40/196]:	Loss: 0.9573006629943848
+Epoch[19][60/196]:	Loss: 0.961101233959198
+Epoch[19][80/196]:	Loss: 0.9813895225524902
+Epoch[19][100/196]:	Loss: 1.0774621963500977
+Epoch[19][120/196]:	Loss: 0.24866965413093567
+Epoch[19][140/196]:	Loss: 1.0266752243041992
+Epoch[19][160/196]:	Loss: 1.1339560747146606
+Epoch[19][180/196]:	Loss: 1.3766943216323853
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[20][0/196]:	Loss: 0.9312435388565063
+Epoch[20][20/196]:	Loss: 1.035941243171692
+Epoch[20][40/196]:	Loss: 1.0532668828964233
+Epoch[20][60/196]:	Loss: 0.8889862298965454
+Epoch[20][80/196]:	Loss: 0.8821427226066589
+Epoch[20][100/196]:	Loss: 0.8677539229393005
+Epoch[20][120/196]:	Loss: 0.3267647922039032
+Epoch[20][140/196]:	Loss: 1.1644115447998047
+Epoch[20][160/196]:	Loss: 1.044536828994751
+Epoch[20][180/196]:	Loss: 1.686618685722351
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[21][0/196]:	Loss: 0.9889542460441589
+Epoch[21][20/196]:	Loss: 1.006325364112854
+Epoch[21][40/196]:	Loss: 1.034203052520752
+Epoch[21][60/196]:	Loss: 1.328291893005371
+Epoch[21][80/196]:	Loss: 0.7362432479858398
+Epoch[21][100/196]:	Loss: 0.7878907918930054
+Epoch[21][120/196]:	Loss: 0.16675327718257904
+Epoch[21][140/196]:	Loss: 0.7351512312889099
+Epoch[21][160/196]:	Loss: 0.9481545686721802
+Epoch[21][180/196]:	Loss: 0.8466587662696838
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[22][0/196]:	Loss: 1.0917326211929321
+Epoch[22][20/196]:	Loss: 1.1548001766204834
+Epoch[22][40/196]:	Loss: 0.6642187833786011
+Epoch[22][60/196]:	Loss: 0.8302516937255859
+Epoch[22][80/196]:	Loss: 0.7905709147453308
+Epoch[22][100/196]:	Loss: 0.7247616648674011
+Epoch[22][120/196]:	Loss: 0.3799590766429901
+Epoch[22][140/196]:	Loss: 0.7720925807952881
+Epoch[22][160/196]:	Loss: 1.1209300756454468
+Epoch[22][180/196]:	Loss: 0.7553095817565918
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[23][0/196]:	Loss: 0.7130217552185059
+Epoch[23][20/196]:	Loss: 1.1256282329559326
+Epoch[23][40/196]:	Loss: 0.8208187818527222
+Epoch[23][60/196]:	Loss: 0.8658353686332703
+Epoch[23][80/196]:	Loss: 0.7644586563110352
+Epoch[23][100/196]:	Loss: 0.9451267123222351
+Epoch[23][120/196]:	Loss: 0.261104553937912
+Epoch[23][140/196]:	Loss: 0.5711615681648254
+Epoch[23][160/196]:	Loss: 0.9449613094329834
+Epoch[23][180/196]:	Loss: 0.8410518169403076
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[24][0/196]:	Loss: 0.6572561264038086
+Epoch[24][20/196]:	Loss: 0.5803967714309692
+Epoch[24][40/196]:	Loss: 0.5060254335403442
+Epoch[24][60/196]:	Loss: 0.6373881101608276
+Epoch[24][80/196]:	Loss: 1.0429096221923828
+Epoch[24][100/196]:	Loss: 0.6944662928581238
+Epoch[24][120/196]:	Loss: 0.17142575979232788
+Epoch[24][140/196]:	Loss: 0.6011336445808411
+Epoch[24][160/196]:	Loss: 0.576321005821228
+Epoch[24][180/196]:	Loss: 0.9899410009384155
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[25][0/196]:	Loss: 0.8038795590400696
+Epoch[25][20/196]:	Loss: 0.743196964263916
+Epoch[25][40/196]:	Loss: 0.5872366428375244
+Epoch[25][60/196]:	Loss: 0.719231128692627
+Epoch[25][80/196]:	Loss: 0.9422488808631897
+Epoch[25][100/196]:	Loss: 0.785029411315918
+Epoch[25][120/196]:	Loss: 0.14622744917869568
+Epoch[25][140/196]:	Loss: 0.8561552166938782
+Epoch[25][160/196]:	Loss: 0.6908735632896423
+Epoch[25][180/196]:	Loss: 0.7115586400032043
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[26][0/196]:	Loss: 0.6155990362167358
+Epoch[26][20/196]:	Loss: 0.3645513653755188
+Epoch[26][40/196]:	Loss: 0.905053436756134
+Epoch[26][60/196]:	Loss: 0.6890243887901306
+Epoch[26][80/196]:	Loss: 0.6633059978485107
+Epoch[26][100/196]:	Loss: 0.6808426380157471
+Epoch[26][120/196]:	Loss: 0.22733551263809204
+Epoch[26][140/196]:	Loss: 0.6307105422019958
+Epoch[26][160/196]:	Loss: 0.6669169664382935
+Epoch[26][180/196]:	Loss: 0.9609524607658386
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[27][0/196]:	Loss: 0.3787274658679962
+Epoch[27][20/196]:	Loss: 1.0771450996398926
+Epoch[27][40/196]:	Loss: 0.5762266516685486
+Epoch[27][60/196]:	Loss: 0.6538282036781311
+Epoch[27][80/196]:	Loss: 0.6268002986907959
+Epoch[27][100/196]:	Loss: 0.702393651008606
+Epoch[27][120/196]:	Loss: 0.30078205466270447
+Epoch[27][140/196]:	Loss: 0.8906847834587097
+Epoch[27][160/196]:	Loss: 0.5684192776679993
+Epoch[27][180/196]:	Loss: 0.7385678887367249
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[28][0/196]:	Loss: 0.5199234485626221
+Epoch[28][20/196]:	Loss: 0.6459823846817017
+Epoch[28][40/196]:	Loss: 0.5766745209693909
+Epoch[28][60/196]:	Loss: 0.9966267943382263
+Epoch[28][80/196]:	Loss: 0.844395637512207
+Epoch[28][100/196]:	Loss: 0.3666616380214691
+Epoch[28][120/196]:	Loss: 0.19135944545269012
+Epoch[28][140/196]:	Loss: 0.47220543026924133
+Epoch[28][160/196]:	Loss: 0.5971964001655579
+Epoch[28][180/196]:	Loss: 0.6436602473258972
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[29][0/196]:	Loss: 0.3393855392932892
+Epoch[29][20/196]:	Loss: 0.39057648181915283
+Epoch[29][40/196]:	Loss: 0.44506222009658813
+Epoch[29][60/196]:	Loss: 0.6807858347892761
+Epoch[29][80/196]:	Loss: 0.7916461825370789
+Epoch[29][100/196]:	Loss: 0.5038401484489441
+Epoch[29][120/196]:	Loss: 0.2191736102104187
+Epoch[29][140/196]:	Loss: 0.7387043237686157
+Epoch[29][160/196]:	Loss: 0.5074966549873352
+Epoch[29][180/196]:	Loss: 0.5184110403060913
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[30][0/196]:	Loss: 0.4655677378177643
+Epoch[30][20/196]:	Loss: 0.2740017771720886
+Epoch[30][40/196]:	Loss: 0.6161482930183411
+Epoch[30][60/196]:	Loss: 0.5062342286109924
+Epoch[30][80/196]:	Loss: 0.6615614295005798
+Epoch[30][100/196]:	Loss: 0.5440863966941833
+Epoch[30][120/196]:	Loss: 0.2677299678325653
+Epoch[30][140/196]:	Loss: 0.4075305759906769
+Epoch[30][160/196]:	Loss: 0.31988605856895447
+Epoch[30][180/196]:	Loss: 0.7036573886871338
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[31][0/196]:	Loss: 0.33314746618270874
+Epoch[31][20/196]:	Loss: 0.3477262258529663
+Epoch[31][40/196]:	Loss: 0.3385395407676697
+Epoch[31][60/196]:	Loss: 0.6557997465133667
+Epoch[31][80/196]:	Loss: 0.41896092891693115
+Epoch[31][100/196]:	Loss: 0.39011481404304504
+Epoch[31][120/196]:	Loss: 0.11078912764787674
+Epoch[31][140/196]:	Loss: 0.479314386844635
+Epoch[31][160/196]:	Loss: 0.26093292236328125
+Epoch[31][180/196]:	Loss: 0.46370407938957214
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[32][0/196]:	Loss: 0.28413528203964233
+Epoch[32][20/196]:	Loss: 0.26579490303993225
+Epoch[32][40/196]:	Loss: 0.24828414618968964
+Epoch[32][60/196]:	Loss: 0.3316909968852997
+Epoch[32][80/196]:	Loss: 0.19646336138248444
+Epoch[32][100/196]:	Loss: 0.4725545346736908
+Epoch[32][120/196]:	Loss: 0.0747724249958992
+Epoch[32][140/196]:	Loss: 0.22878368198871613
+Epoch[32][160/196]:	Loss: 0.22178028523921967
+Epoch[32][180/196]:	Loss: 0.16641376912593842
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[33][0/196]:	Loss: 0.2859036922454834
+Epoch[33][20/196]:	Loss: 0.2784669101238251
+Epoch[33][40/196]:	Loss: 0.28284135460853577
+Epoch[33][60/196]:	Loss: 0.3918009102344513
+Epoch[33][80/196]:	Loss: 0.16962501406669617
+Epoch[33][100/196]:	Loss: 0.14992506802082062
+Epoch[33][120/196]:	Loss: 0.11837680637836456
+Epoch[33][140/196]:	Loss: 0.2374948263168335
+Epoch[33][160/196]:	Loss: 0.2637779414653778
+Epoch[33][180/196]:	Loss: 0.31304147839546204
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[34][0/196]:	Loss: 0.2567383646965027
+Epoch[34][20/196]:	Loss: 0.12757623195648193
+Epoch[34][40/196]:	Loss: 0.14994141459465027
+Epoch[34][60/196]:	Loss: 0.3709307312965393
+Epoch[34][80/196]:	Loss: 0.18312254548072815
+Epoch[34][100/196]:	Loss: 0.24991945922374725
+Epoch[34][120/196]:	Loss: 0.200436532497406
+Epoch[34][140/196]:	Loss: 0.3233237564563751
+Epoch[34][160/196]:	Loss: 0.1454058140516281
+Epoch[34][180/196]:	Loss: 0.17433343827724457
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[35][0/196]:	Loss: 0.2095361202955246
+Epoch[35][20/196]:	Loss: 0.1504291594028473
+Epoch[35][40/196]:	Loss: 0.15659531950950623
+Epoch[35][60/196]:	Loss: 0.20096652209758759
+Epoch[35][80/196]:	Loss: 0.20819693803787231
+Epoch[35][100/196]:	Loss: 0.33479392528533936
+Epoch[35][120/196]:	Loss: 0.16481508314609528
+Epoch[35][140/196]:	Loss: 0.3444575071334839
+Epoch[35][160/196]:	Loss: 0.150428906083107
+Epoch[35][180/196]:	Loss: 0.18407319486141205
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
