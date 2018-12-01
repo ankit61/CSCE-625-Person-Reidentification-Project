@@ -8,7 +8,7 @@ class ContrastiveLoss(torch.nn.Module):
 	Based on:
 	"""
 
-	def __init__(self, margin=10.0):
+	def __init__(self, margin=100.0):
 		super(ContrastiveLoss, self).__init__()
 		self.margin = margin
 
