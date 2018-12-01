@@ -27,7 +27,7 @@ Final project for CSCE-625 with Dr. Wang
         - Add `--resume network.tar` if you would like to resume from a previously trained pth model
         - Be sure to modify the `train_dataset` location in `main.py` to your designated segmented images
         - To train, run `train(_train_loader, _model, _criterion, _optimizer, _epoch, _print_freq)`
-        - To test, run `test(_test_loader, _model, _criterion, _epoch, _print_freq)'
+        - To test, run `test(_test_loader, _model, _criterion, _epoch, _print_freq)`
         - The tensorboard event data (using tensorboardX) will be written to the /runs/ directory. 
 
 ## Some of our results
