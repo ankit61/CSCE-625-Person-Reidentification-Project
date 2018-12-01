@@ -34,7 +34,13 @@ Final project for CSCE-625 with Dr. Wang
 
 
 ### Examples from our segmentation network: 
+#### Unsegmented
 ![Market1501 Non-Segmented](assets/RawMarketExamples/1.jpg)
 ![Market1501 Non-Segmented](assets/RawMarketExamples/2.jpg)
 ![Market1501 Non-Segmented](assets/RawMarketExamples/3.jpg)
 ![Market1501 Non-Segmented](assets/RawMarketExamples/4.jpg)
+#### Segmented
+![Market1501 Non-Segmented](assets/SegmentedMarketExamples/1.jpg)
+![Market1501 Non-Segmented](assets/SegmentedMarketExamples/2.jpg)
+![Market1501 Non-Segmented](assets/SegmentedMarketExamples/3.jpg)
+![Market1501 Non-Segmented](assets/SegmentedMarketExamples/4.jpg)
