@@ -1,0 +1,92 @@
+=> loading checkpoint '/home/ryan/csce-625-person-re-identification/Siamese/trained_resnets/checkpoint_5.tar'
+=> loaded checkpoint 'False' (epoch 6)
+Epoch[0][0/196]:	Loss: 261.1097106933594
+Epoch[0][20/196]:	Loss: 375.274658203125
+Epoch[0][40/196]:	Loss: 201.35345458984375
+Epoch[0][60/196]:	Loss: 262.85125732421875
+Epoch[0][80/196]:	Loss: 557.6331787109375
+Epoch[0][100/196]:	Loss: 404.90521240234375
+Epoch[0][120/196]:	Loss: 138.63140869140625
+Epoch[0][140/196]:	Loss: 74.0098876953125
+Epoch[0][160/196]:	Loss: 416.4876708984375
+Epoch[0][180/196]:	Loss: 323.1915588378906
+starting 1/150
+/home/ryan/csce-625-person-re-identification/Siamese/mAP.py:141: UserWarning: volatile was removed and now has no effect. Use `with torch.no_grad():` instead.
+  query_tensor = torch.autograd.Variable(query_tensor, volatile=True).cuda()
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+/home/ryan/csce-625-person-re-identification/Siamese/mAP.py:100: UserWarning: volatile was removed and now has no effect. Use `with torch.no_grad():` instead.
+  input_var = torch.autograd.Variable(gallery_img, volatile=True).cuda()
+Epoch[1][0/196]:	Loss: 252.59573364257812
+Epoch[1][20/196]:	Loss: 359.9416809082031
+Epoch[1][40/196]:	Loss: 168.54940795898438
+Epoch[1][60/196]:	Loss: 241.76878356933594
+Epoch[1][80/196]:	Loss: 527.4257202148438
+Epoch[1][100/196]:	Loss: 330.6793212890625
+Epoch[1][120/196]:	Loss: 174.0806427001953
+Epoch[1][140/196]:	Loss: 92.57810974121094
+Epoch[1][160/196]:	Loss: 448.1433410644531
+Epoch[1][180/196]:	Loss: 330.7950744628906
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[2][0/196]:	Loss: 232.5331573486328
+Epoch[2][20/196]:	Loss: 335.1773376464844
+Epoch[2][40/196]:	Loss: 139.01577758789062
+Epoch[2][60/196]:	Loss: 224.2331085205078
+Epoch[2][80/196]:	Loss: 391.8165283203125
+Epoch[2][100/196]:	Loss: 287.6106872558594
+Epoch[2][120/196]:	Loss: 196.43283081054688
+Epoch[2][140/196]:	Loss: 59.97907257080078
+Epoch[2][160/196]:	Loss: 428.990478515625
+Epoch[2][180/196]:	Loss: 298.4725036621094
+starting 1/150
+starting 11/150
+starting 21/150
+starting 31/150
+starting 41/150
+starting 51/150
+starting 61/150
+starting 71/150
+starting 81/150
+starting 91/150
+starting 101/150
+starting 111/150
+starting 121/150
+starting 131/150
+starting 141/150
+Epoch[3][0/196]:	Loss: 221.10092163085938
+Epoch[3][20/196]:	Loss: 331.5583190917969
+Epoch[3][40/196]:	Loss: 147.5260467529297
+Epoch[3][60/196]:	Loss: 208.20516967773438
+Epoch[3][80/196]:	Loss: 423.09771728515625
+Epoch[3][100/196]:	Loss: 294.8319091796875
+Epoch[3][120/196]:	Loss: 175.29855346679688
+Epoch[3][140/196]:	Loss: 79.15401458740234
+Epoch[3][160/196]:	Loss: 408.86199951171875
+Epoch[3][180/196]:	Loss: 286.8599548339844
+starting 1/150
