@@ -15,6 +15,9 @@ class Siamese(torch.nn.Module):
 		o2 = self.resnet(y)
 		return o1, o2
 
+	def forwardForOne(self, x):
+		return self.resnet(x)
+
 	def load(self, state_dict):
 		model_state_dict = self.state_dict()
 		sub_dict = {k : v for k, v in state_dict.items() if k in model_state_dict and v.size() == model_state_dict[k].size() }
