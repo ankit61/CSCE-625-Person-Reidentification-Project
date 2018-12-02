@@ -82,7 +82,7 @@ if __name__=="__main__":
 			gallery_loader = torch.utils.data.DataLoader(
 				SimpleDataset(path=directory, transforms=imgTransforms),
 				batch_size=1, shuffle=False,
-				num_workers=4, pin_memory=True
+				num_workers=1, pin_memory=True
 			)
 
 			test_names, test_features = extractor(model, gallery_loader)
@@ -91,7 +91,7 @@ if __name__=="__main__":
 			print(len(test_features))
 			print(directory)
 			for i in range(len(test_names)):
-				test_names[i] = test_names[i].split('_')[-1]
+				test_names[i] = test_names[i].split('_')[-1].split(".")[0]
 
 			results = {'names': test_names, 'features': test_features.numpy()}
 			scipy.io.savemat(os.path.join(log_dir, 'feature_%s_%s.mat' % (str(count), os.path.basename(directory) )), results)
