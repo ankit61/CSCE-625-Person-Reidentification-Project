@@ -2,10 +2,9 @@
 Final project for CSCE-625 with Dr. Wang
 
 ## Team Members
-- Ryan Wells
 - Ankit Ramchandani
 - Benton Guess
-
+- Ryan Wells
 
 
 
